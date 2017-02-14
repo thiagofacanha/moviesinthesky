@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="movie_order_label_options">
+        <item>@string/popularity_label</item>
+        <item>@string/rate_label</item>
+    </string-array>
+
+
+    <string-array name="movie_order_values_options">
+        <item>@string/popularity_value</item>
+        <item>@string/rate_value</item>
+    </string-array>
+
+
+</resources>
