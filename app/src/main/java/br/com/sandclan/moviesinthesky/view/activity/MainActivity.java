@@ -128,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
                         getString(R.string.popularity_value));
 
                 final String MOVIE_BASE_URL =
-                        "https://api.themoviedb.org/3/discover/movie?include_adult=false&page=1";
+                        "https://api.themoviedb.org/3/movie/"+sortOrder+"?include_adult=false&page=1";
                 final String LANGUAGE = "language";
                 final String SORT = "sort_by";
                 final String API_KEY = "api_key";
@@ -136,7 +136,6 @@ public class MainActivity extends AppCompatActivity {
                 Uri builtUri = Uri.parse(MOVIE_BASE_URL).buildUpon()
                         .appendQueryParameter(API_KEY, BuildConfig.API_KEY)
                         .appendQueryParameter(LANGUAGE, "pt-BR")
-                        .appendQueryParameter(SORT, sortOrder)
                         .build();
 
                 URL url = new URL(builtUri.toString());

@@ -11,46 +11,35 @@ import com.squareup.picasso.Picasso;
 
 import br.com.sandclan.moviesinthesky.R;
 import br.com.sandclan.moviesinthesky.entity.Movie;
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 public class DetailActivity extends AppCompatActivity {
     private Movie mMovie;
+    @BindView(R.id.imageview_detail_poster) ImageView poster;
+    @BindView(R.id.textview_summary) TextView summary;
+    @BindView(R.id.textview_original_title) TextView originalTitle;
+    @BindView(R.id.textview_detail_rate_value) TextView rateValue;
+    @BindView(R.id.textview_release_date) TextView release_date;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        ButterKnife.bind(this);
         Intent intent = this.getIntent();
         if (intent != null && intent.hasExtra("Movie")) {
             mMovie = (Movie) intent.getSerializableExtra("Movie");
-
             setTitle(mMovie.getTitle());
-            ImageView poster = (ImageView) findViewById(R.id.imageview_detail_poster);
             Picasso.with(this).load(mMovie.getImageUrl()).into(poster);
-
-            TextView summary = (TextView)findViewById(R.id.textview_summary);
             summary.setText(mMovie.getSynopsis());
-
-            TextView originalTitle = (TextView) findViewById(R.id.textview_original_title);
             originalTitle.setText(mMovie.getOriginal_title());
-
-            TextView rateValue = (TextView)findViewById(R.id.textview_detail_rate_value);
             rateValue.setText(mMovie.getVoteAverage().toString());
-
-            TextView release_date = (TextView)findViewById(R.id.textview_release_date);
             release_date.setText(mMovie.getReleaseDate());
-
         }
 
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
     }
 
 }
