@@ -1,10 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
-    <TextView
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="@dimen/grid_view_width"
+    android:layout_height="@dimen/grid_view_width"
+    android:background="@color/colorPrimary"
+    android:layout_gravity="center">
+    <ImageView
+        android:id="@+id/imageview_poster"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/movie_title"/>
+        android:layout_centerInParent="true"
+        android:layout_gravity="center_horizontal"
+        android:scaleType="centerCrop" />
 
-</LinearLayout>
+
+    <TextView
+        android:id="@+id/textview_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:layout_alignParentBottom="true"
+        android:textSize="@dimen/title_movie_grid_view_text_size"
+        android:textColor="@android:color/white"
+        android:layout_gravity="center_horizontal"
+        android:textStyle="bold" />
+
+</RelativeLayout>

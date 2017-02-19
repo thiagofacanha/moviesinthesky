@@ -14,7 +14,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.ListView;
+import android.widget.GridView;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -24,6 +28,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import br.com.sandclan.moviesinthesky.BuildConfig;
 import br.com.sandclan.moviesinthesky.R;
 import br.com.sandclan.moviesinthesky.adapter.MovieAdapter;
 import br.com.sandclan.moviesinthesky.entity.Movie;
@@ -39,31 +44,25 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         mMovies = new ArrayList<Movie>();
-        Movie m1 = new Movie();
-        m1.setTitle("oi1");
-        mMovies.add(m1);
-        Movie m2 = new Movie();
-        m2.setTitle("oi2");
-        mMovies.add(m2);
-        Movie m3 = new Movie();
-        m3.setTitle("oi3");
-        mMovies.add(m3);
-        Movie m4 = new Movie();
-        m4.setTitle("oi4");
-        mMovies.add(m4);
 
-        mMovieAdapter = new MovieAdapter(MainActivity.this,mMovies);
-        final ListView mForecastListView = (ListView) findViewById(R.id.listview_movies);
-        mForecastListView.setAdapter(mMovieAdapter);
-        mForecastListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mMovieAdapter = new MovieAdapter(MainActivity.this, mMovies);
+        final GridView mForecastGridView = (GridView) findViewById(R.id.gridview);
+        mForecastGridView.setAdapter(mMovieAdapter);
+        mForecastGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Movie movie = (Movie)mMovieAdapter.getItem(position);
+                Movie movie = (Movie) mMovieAdapter.getItem(position);
                 Intent detailIntent = new Intent(MainActivity.this, DetailActivity.class);
-                detailIntent.putExtra(Intent.EXTRA_TEXT, movie.getId());
+                detailIntent.putExtra("Movie", movie);
                 startActivity(detailIntent);
             }
         });
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         updateMovies();
     }
 
@@ -93,38 +92,51 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateMovies() {
-        FetchMovieTask weatherTask = new FetchMovieTask();
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-        weatherTask.execute("");
+        FetchMovieTask movieTask = new FetchMovieTask();
+        movieTask.execute("");
     }
 
-    public class FetchMovieTask extends AsyncTask<String, Void, String[]> {
+    public class FetchMovieTask extends AsyncTask<String, Void, List<Movie>> {
+        @Override
+        protected void onPostExecute(List<Movie> movies) {
+            if(movies != null){
+                mMovies.clear();
+                mMovies.addAll(movies);
+                mMovieAdapter.notifyDataSetChanged();
+            }
+        }
 
         @Override
-        protected String[] doInBackground(String... params) {
+        protected List<Movie> doInBackground(String... params) {
 
             if (params.length == 0) {
                 return null;
             }
-            HttpURLConnection urlConnection = null;
-            BufferedReader reader = null;
-
+            HttpURLConnection urlConnection;
+            BufferedReader reader;
+            List<Movie> movies = new ArrayList<Movie>();
 
             // Will contain the raw JSON response as a string.
-            String movieJsonStr = null;
-            String order = "rate";
+            String movieJsonStr;
 
             try {
 
+                SharedPreferences sharedPrefs =
+                        PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+                String sortOrder = sharedPrefs.getString(
+                        getString(R.string.pref_order_by_key),
+                        getString(R.string.popularity_value));
+
                 final String MOVIE_BASE_URL =
-                        "https://api.themoviedb.org/3/movie/550?api_key=THISISNOTMYKEY=)";
-                final String QUERY_PARAM = "q";
-                final String FORMAT_PARAM = "mode";
-                final String UNITS_PARAM = "units";
-                final String DAYS_PARAM = "cnt";
-                final String APPID_PARAM = "APPID";
+                        "https://api.themoviedb.org/3/discover/movie?include_adult=false&page=1";
+                final String LANGUAGE = "language";
+                final String SORT = "sort_by";
+                final String API_KEY = "api_key";
 
                 Uri builtUri = Uri.parse(MOVIE_BASE_URL).buildUpon()
+                        .appendQueryParameter(API_KEY, BuildConfig.API_KEY)
+                        .appendQueryParameter(LANGUAGE, "pt-BR")
+                        .appendQueryParameter(SORT, sortOrder)
                         .build();
 
                 URL url = new URL(builtUri.toString());
@@ -160,13 +172,40 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("MovieInTheSky", movieJsonStr);
 
 
+                movies = getMoviesDataFromJson(movieJsonStr);
 
-                return new String[0];
-
-            }catch(Exception e)
-            {
-                Log.d("MovieInTheSky",e.getMessage());
-                return null;
+            } catch (Exception e) {
+                Log.d("MovieInTheSky", e.getMessage());
             }
+            return movies;
         }
-}}
+
+
+    }
+
+
+
+    private List<Movie> getMoviesDataFromJson(String JsonStr)
+            throws JSONException {
+        List<Movie> movies = new ArrayList<Movie>();
+        JSONObject resultJsonObject = new JSONObject(JsonStr);
+        JSONArray moviesArray = resultJsonObject.getJSONArray("results");
+
+
+        for (int i = 0; i < moviesArray.length(); i++) {
+            Movie movie = new Movie();
+            JSONObject movieJSonObject = moviesArray.getJSONObject(i);
+            movie.setId(movieJSonObject.getInt("id"));
+            movie.setTitle(movieJSonObject.getString("title"));
+            movie.setOriginal_title(movieJSonObject.getString("original_title"));
+            movie.setImageUrl(movieJSonObject.getString("poster_path"));
+            movie.setSynopsis(movieJSonObject.getString("overview"));
+            movie.setVoteAverage(movieJSonObject.getDouble("vote_average"));
+            movie.setReleaseDate((movieJSonObject.getString("release_date")));
+            movies.add(movie);
+        }
+
+        return movies;
+
+    }
+}

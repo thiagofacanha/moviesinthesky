@@ -1,14 +1,16 @@
 package br.com.sandclan.moviesinthesky.entity;
 
-import java.util.Date;
+import java.io.Serializable;
 
-public class Movie {
+public class Movie implements Serializable {
+    public static final String HTTP_IMAGE_TMDB_ORG_T_P_W500 = "http://image.tmdb.org/t/p/w500";
     private int id;
     private String title;
+    private String original_title;
     private String imageUrl;
     private String synopsis;
-    private float voteAverage;
-    private Date releaseDate;
+    private Double voteAverage;
+    private String releaseDate;
 
     public int getId() {
         return id;
@@ -28,7 +30,7 @@ public class Movie {
     }
 
     public String getImageUrl() {
-        return imageUrl;
+        return HTTP_IMAGE_TMDB_ORG_T_P_W500 + imageUrl;
     }
 
     public void setImageUrl(String imageUrl) {
@@ -43,20 +45,28 @@ public class Movie {
         this.synopsis = synopsis;
     }
 
-    public float getVoteAverage() {
+    public Double getVoteAverage() {
         return voteAverage;
     }
 
-    public void setVoteAverage(float voteAverage) {
+    public void setVoteAverage(Double voteAverage) {
         this.voteAverage = voteAverage;
     }
 
-    public Date getReleaseDate() {
+    public String getReleaseDate() {
         return releaseDate;
     }
 
-    public void setReleaseDate(Date releaseDate) {
+    public void setReleaseDate(String releaseDate) {
         this.releaseDate = releaseDate;
+    }
+
+    public String getOriginal_title() {
+        return original_title;
+    }
+
+    public void setOriginal_title(String original_title) {
+        this.original_title = original_title;
     }
 }
 

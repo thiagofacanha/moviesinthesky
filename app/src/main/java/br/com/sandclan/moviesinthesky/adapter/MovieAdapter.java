@@ -6,7 +6,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -58,6 +61,7 @@ public class MovieAdapter extends BaseAdapter {
 
         Movie movie = getItem(position);
         holder.title.setText(movie.getTitle());
+        Picasso.with(context).load( movie.getImageUrl()).into(holder.poster);
 
 
         return view;
@@ -65,11 +69,13 @@ public class MovieAdapter extends BaseAdapter {
 
     public class ViewHolder {
 
-        final TextView title;
+        private final TextView title;
+        private final ImageView poster;
 
         public ViewHolder(View view) {
 
-            title = (TextView) view.findViewById(R.id.movie_title);
+            title = (TextView) view.findViewById(R.id.textview_title);
+            poster = (ImageView) view.findViewById(R.id.imageview_poster);
 
         }
     }
