@@ -61,7 +61,7 @@ public class MovieAdapter extends BaseAdapter {
 
         Movie movie = getItem(position);
         holder.title.setText(movie.getTitle());
-        Picasso.with(context).load( movie.getImageUrl()).into(holder.poster);
+        Picasso.with(context).load( movie.getImageUrl()).error(R.drawable.image_not_found).placeholder(R.drawable.image_not_found).into(holder.poster);
 
 
         return view;

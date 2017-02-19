@@ -33,7 +33,7 @@ public class DetailActivity extends AppCompatActivity {
         if (intent != null && intent.hasExtra("Movie")) {
             mMovie = (Movie) intent.getSerializableExtra("Movie");
             setTitle(mMovie.getTitle());
-            Picasso.with(this).load(mMovie.getImageUrl()).into(poster);
+            Picasso.with(this).load(mMovie.getImageUrl()).error(R.drawable.image_not_found).placeholder(R.drawable.image_not_found).into(poster);
             summary.setText(mMovie.getSynopsis());
             originalTitle.setText(mMovie.getOriginal_title());
             rateValue.setText(mMovie.getVoteAverage().toString());
