@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import br.com.sandclan.moviesinthesky.R;
+import br.com.sandclan.moviesinthesky.Util.Constants;
 import br.com.sandclan.moviesinthesky.adapter.MovieAdapter;
 import br.com.sandclan.moviesinthesky.assync.FetchMovieTask;
 import br.com.sandclan.moviesinthesky.entity.Movie;
@@ -30,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        mMovies = new ArrayList<Movie>();
+        mMovies = new ArrayList<>();
 
         mMovieAdapter = new MovieAdapter(MainActivity.this, mMovies);
         final GridView mForecastGridView = (GridView) findViewById(R.id.gridview);
@@ -40,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Movie movie = (Movie) mMovieAdapter.getItem(position);
                 Intent detailIntent = new Intent(MainActivity.this, DetailActivity.class);
-                detailIntent.putExtra("Movie", movie);
+                detailIntent.putExtra(Constants.MOVIE, movie);
                 startActivity(detailIntent);
             }
         });
@@ -80,9 +81,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateMovies() {
         new FetchMovieTask(this, new FetchMoviesTaskCompleteListener()).execute("");
+
     }
 
-    public class FetchMoviesTaskCompleteListener implements AssyncTaskCompletListener<List<Movie>>
+    private class FetchMoviesTaskCompleteListener implements AssyncTaskCompletListener<List<Movie>>
     {
 
         @Override
@@ -92,6 +94,8 @@ public class MainActivity extends AppCompatActivity {
             mMovieAdapter.notifyDataSetChanged();
         }
     }
+
+
 
 
 }

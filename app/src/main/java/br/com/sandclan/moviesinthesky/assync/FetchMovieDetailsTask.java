@@ -23,37 +23,36 @@ import java.util.List;
 import br.com.sandclan.moviesinthesky.BuildConfig;
 import br.com.sandclan.moviesinthesky.R;
 import br.com.sandclan.moviesinthesky.Util.Constants;
-import br.com.sandclan.moviesinthesky.entity.Movie;
 import br.com.sandclan.moviesinthesky.interfaces.AssyncTaskCompletListener;
 
-public class FetchMovieTask extends AsyncTask<String, Void, List<Movie>> {
+public class FetchMovieDetailsTask extends AsyncTask<Integer, Void, List<String>> {
 
     private Context mContext;
-    private AssyncTaskCompletListener<List<Movie>> listener;
+    private AssyncTaskCompletListener<List<String>> listener;
 
-    public FetchMovieTask(Context ctx, AssyncTaskCompletListener<List<Movie>> list)
+    public FetchMovieDetailsTask(Context ctx, AssyncTaskCompletListener<List<String>> list)
     {
         this.mContext = ctx;
         this.listener = list;
     }
 
     @Override
-    protected void onPostExecute(List<Movie> movies) {
-        if(movies != null){
-            super.onPostExecute(movies);
-            listener.onTaskComplete(movies);
+    protected void onPostExecute(List<String> trailers) {
+        if(trailers != null){
+            super.onPostExecute(trailers);
+            listener.onTaskComplete(trailers);
         }
     }
 
     @Override
-    protected List<Movie> doInBackground(String... params) {
+    protected List<String> doInBackground(Integer... params) {
 
         if (params.length == 0) {
             return null;
         }
         HttpURLConnection urlConnection;
         BufferedReader reader;
-        List<Movie> movies = new ArrayList<>();
+        List<String> trailers = new ArrayList<>();
 
         // Will contain the raw JSON response as a string.
         String movieJsonStr;
@@ -66,13 +65,13 @@ public class FetchMovieTask extends AsyncTask<String, Void, List<Movie>> {
                     mContext.getString(R.string.popularity_value));
 
             final String MOVIE_BASE_URL =
-                    "https://api.themoviedb.org/3/movie/"+sortOrder+"?include_adult=false&page=1";
+                    "https://api.themoviedb.org/3/movie/"+params[0]+"/videos";
             final String LANGUAGE = "language";
             final String API_KEY = "api_key";
 
             Uri builtUri = Uri.parse(MOVIE_BASE_URL).buildUpon()
                     .appendQueryParameter(API_KEY, BuildConfig.API_KEY)
-                    .appendQueryParameter(LANGUAGE, "pt-BR")
+                //    .appendQueryParameter(LANGUAGE, "pt-BR")
                     .build();
 
             URL url = new URL(builtUri.toString());
@@ -108,36 +107,29 @@ public class FetchMovieTask extends AsyncTask<String, Void, List<Movie>> {
             Log.d("MovieInTheSky", movieJsonStr);
 
 
-            movies = getMoviesDataFromJson(movieJsonStr);
+            trailers = getMovieDataFromJson(movieJsonStr);
 
         } catch (Exception e) {
             Log.d("MovieInTheSky", e.getMessage());
         }
-        return movies;
+        return trailers;
     }
 
 
-    private List<Movie> getMoviesDataFromJson(String JsonStr)
+    private List<String> getMovieDataFromJson(String JsonStr)
             throws JSONException {
-        List<Movie> movies = new ArrayList<>();
+        List<String> trailers = new ArrayList<>();
         JSONObject resultJsonObject = new JSONObject(JsonStr);
-        JSONArray moviesArray = resultJsonObject.getJSONArray(Constants.RESULTS);
+        JSONArray videoObjects = resultJsonObject.getJSONArray(Constants.RESULTS);
 
 
-        for (int i = 0; i < moviesArray.length(); i++) {
-            Movie movie = new Movie();
-            JSONObject movieJSonObject = moviesArray.getJSONObject(i);
-            movie.setId(movieJSonObject.getInt("id"));
-            movie.setTitle(movieJSonObject.getString("title"));
-            movie.setOriginal_title(movieJSonObject.getString("original_title"));
-            movie.setImageUrl(movieJSonObject.getString("poster_path"));
-            movie.setSynopsis(movieJSonObject.getString("overview"));
-            movie.setVoteAverage(movieJSonObject.getDouble("vote_average"));
-            movie.setReleaseDate((movieJSonObject.getString("release_date")));
-            movies.add(movie);
+        for (int i = 0; i < videoObjects.length(); i++) {
+            JSONObject movieJSonObject = videoObjects.getJSONObject(i);
+            if(Constants.YOUTUBE.equals(movieJSonObject.getString(Constants.SITE)) )
+                trailers.add(movieJSonObject.getString(Constants.KEY));
         }
 
-        return movies;
+        return trailers;
 
     }
 
