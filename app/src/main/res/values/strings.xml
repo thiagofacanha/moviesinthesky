@@ -14,6 +14,13 @@
     <string name="trailer">Trailer:</string>
     <string name="original_title">Original Title:</string>
     <string name="movie_poster">Movie Poster</string>
+    <string name="favourite">Favourite Icon</string>
     <string name="trailer_icon">Trailer Icon</string>
+
+
+    <!-- SyncAdapter related -->
+    <string name="sync_account_type">moviesinthesky.sandclan.com</string>
+    <string name="content_authority">br.com.sandclan.moviesinthesky</string>
+    <string name="user_reviews">User Reviews</string>
 
 </resources>

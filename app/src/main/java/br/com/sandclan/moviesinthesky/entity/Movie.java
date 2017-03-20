@@ -3,14 +3,25 @@ package br.com.sandclan.moviesinthesky.entity;
 import java.io.Serializable;
 
 public class Movie implements Serializable {
-    public static final String HTTP_IMAGE_TMDB_ORG_T_P_W500 = "http://image.tmdb.org/t/p/w500";
     private int id;
+    private int idAPI;
     private String title;
-    private String original_title;
+    private String originalTitle;
     private String imageUrl;
     private String synopsis;
     private Double voteAverage;
     private String releaseDate;
+    private boolean isFavourite;
+    private String userReviews;
+    private String trailerCode;
+
+    public int getIdAPI() {
+        return idAPI;
+    }
+
+    public void setIdAPI(int idAPI) {
+        this.idAPI = idAPI;
+    }
 
     public int getId() {
         return id;
@@ -30,7 +41,7 @@ public class Movie implements Serializable {
     }
 
     public String getImageUrl() {
-        return HTTP_IMAGE_TMDB_ORG_T_P_W500 + imageUrl;
+        return  imageUrl;
     }
 
     public void setImageUrl(String imageUrl) {
@@ -61,12 +72,36 @@ public class Movie implements Serializable {
         this.releaseDate = releaseDate;
     }
 
-    public String getOriginal_title() {
-        return original_title;
+    public String getOriginalTitle() {
+        return originalTitle;
     }
 
-    public void setOriginal_title(String original_title) {
-        this.original_title = original_title;
+    public void setOriginalTitle(String originalTitle) {
+        this.originalTitle = originalTitle;
+    }
+
+    public boolean isFavourite() {
+        return isFavourite;
+    }
+
+    public void setFavourite(boolean favourite) {
+        isFavourite = favourite;
+    }
+
+    public String getUserReviews() {
+        return userReviews;
+    }
+
+    public void setUserReviews(String userReviews) {
+        this.userReviews = userReviews;
+    }
+
+    public String getTrailerCode() {
+        return trailerCode;
+    }
+
+    public void setTrailerCode(String trailerCode) {
+        this.trailerCode = trailerCode;
     }
 }
 

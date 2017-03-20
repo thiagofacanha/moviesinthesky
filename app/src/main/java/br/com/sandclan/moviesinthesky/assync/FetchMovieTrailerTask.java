@@ -25,20 +25,19 @@ import br.com.sandclan.moviesinthesky.R;
 import br.com.sandclan.moviesinthesky.Util.Constants;
 import br.com.sandclan.moviesinthesky.interfaces.AssyncTaskCompletListener;
 
-public class FetchMovieDetailsTask extends AsyncTask<Integer, Void, List<String>> {
+public class FetchMovieTrailerTask extends AsyncTask<Integer, Void, List<String>> {
 
     private Context mContext;
     private AssyncTaskCompletListener<List<String>> listener;
 
-    public FetchMovieDetailsTask(Context ctx, AssyncTaskCompletListener<List<String>> list)
-    {
+    public FetchMovieTrailerTask(Context ctx, AssyncTaskCompletListener<List<String>> list) {
         this.mContext = ctx;
         this.listener = list;
     }
 
     @Override
     protected void onPostExecute(List<String> trailers) {
-        if(trailers != null){
+        if (trailers != null) {
             super.onPostExecute(trailers);
             listener.onTaskComplete(trailers);
         }
@@ -65,13 +64,13 @@ public class FetchMovieDetailsTask extends AsyncTask<Integer, Void, List<String>
                     mContext.getString(R.string.popularity_value));
 
             final String MOVIE_BASE_URL =
-                    "https://api.themoviedb.org/3/movie/"+params[0]+"/videos";
+                    "https://api.themoviedb.org/3/movie/" + params[0] + "/videos";
             final String LANGUAGE = "language";
             final String API_KEY = "api_key";
 
             Uri builtUri = Uri.parse(MOVIE_BASE_URL).buildUpon()
                     .appendQueryParameter(API_KEY, BuildConfig.API_KEY)
-                //    .appendQueryParameter(LANGUAGE, "pt-BR")
+                    //    .appendQueryParameter(LANGUAGE, "pt-BR")
                     .build();
 
             URL url = new URL(builtUri.toString());
@@ -107,7 +106,7 @@ public class FetchMovieDetailsTask extends AsyncTask<Integer, Void, List<String>
             Log.d("MovieInTheSky", movieJsonStr);
 
 
-            trailers = getMovieDataFromJson(movieJsonStr);
+            trailers = getMovieDataFromJson(params[0], movieJsonStr);
 
         } catch (Exception e) {
             Log.d("MovieInTheSky", e.getMessage());
@@ -116,7 +115,7 @@ public class FetchMovieDetailsTask extends AsyncTask<Integer, Void, List<String>
     }
 
 
-    private List<String> getMovieDataFromJson(String JsonStr)
+    private List<String> getMovieDataFromJson(int id, String JsonStr)
             throws JSONException {
         List<String> trailers = new ArrayList<>();
         JSONObject resultJsonObject = new JSONObject(JsonStr);
@@ -125,10 +124,9 @@ public class FetchMovieDetailsTask extends AsyncTask<Integer, Void, List<String>
 
         for (int i = 0; i < videoObjects.length(); i++) {
             JSONObject movieJSonObject = videoObjects.getJSONObject(i);
-            if(Constants.YOUTUBE.equals(movieJSonObject.getString(Constants.SITE)) )
+            if (Constants.YOUTUBE.equals(movieJSonObject.getString(Constants.SITE)))
                 trailers.add(movieJSonObject.getString(Constants.KEY));
         }
-
         return trailers;
 
     }

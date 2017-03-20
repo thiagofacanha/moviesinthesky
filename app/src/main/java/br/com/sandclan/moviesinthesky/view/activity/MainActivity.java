@@ -1,51 +1,69 @@
 package br.com.sandclan.moviesinthesky.view.activity;
 
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.GridView;
-
-import java.util.ArrayList;
-import java.util.List;
+import android.widget.ListView;
 
 import br.com.sandclan.moviesinthesky.R;
 import br.com.sandclan.moviesinthesky.Util.Constants;
 import br.com.sandclan.moviesinthesky.adapter.MovieAdapter;
-import br.com.sandclan.moviesinthesky.assync.FetchMovieTask;
+import br.com.sandclan.moviesinthesky.data.MovieContract;
 import br.com.sandclan.moviesinthesky.entity.Movie;
-import br.com.sandclan.moviesinthesky.interfaces.AssyncTaskCompletListener;
+import br.com.sandclan.moviesinthesky.sync.MovieSyncAdapter;
 
-public class MainActivity extends AppCompatActivity {
-    private BaseAdapter mMovieAdapter;
-    private List<Movie> mMovies;
+public class MainActivity extends AppCompatActivity   implements android.app.LoaderManager.LoaderCallbacks<Cursor> {
+    private MovieAdapter mMovieAdapter;
+    private GridView mMovieGridView;
+    private static final String[] MOVIE_COLUMNS = {
+            MovieContract.MovieEntry._ID,
+            MovieContract.MovieEntry.COLUMN_ID_FROM_MOVIEDBAPI,
+            MovieContract.MovieEntry.COLUMN_TITLE,
+            MovieContract.MovieEntry.COLUMN_ORIGINAL_TITLE,
+            MovieContract.MovieEntry.COLUMN_IMAGE_URL,
+            MovieContract.MovieEntry.COLUMN_SYNOPSIS,
+            MovieContract.MovieEntry.COLUMN_RELEASE_DATE,
+            MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE,
+            MovieContract.MovieEntry.COLUMN_USER_REVIEWS,
+            MovieContract.MovieEntry.COLUMN_TRAILER_CODE_ID,
+            MovieContract.MovieEntry.COLUMN_FAVOURITE
+    };
+    private int mPosition = ListView.INVALID_POSITION;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Log.d("MovieInTheSky", "onCreate - MainActivity");
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        mMovies = new ArrayList<>();
 
-        mMovieAdapter = new MovieAdapter(MainActivity.this, mMovies);
-        final GridView mForecastGridView = (GridView) findViewById(R.id.gridview);
-        mForecastGridView.setAdapter(mMovieAdapter);
-        mForecastGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mMovieAdapter = new MovieAdapter(MainActivity.this, null,0);
+        mMovieGridView = (GridView) findViewById(R.id.gridview);
+        mMovieGridView.setAdapter(mMovieAdapter);
+        mMovieGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Movie movie = (Movie) mMovieAdapter.getItem(position);
+                Movie movie =  mMovieAdapter.getItem(position);
                 Intent detailIntent = new Intent(MainActivity.this, DetailActivity.class);
                 detailIntent.putExtra(Constants.MOVIE, movie);
                 startActivity(detailIntent);
             }
         });
+        MovieSyncAdapter.initializeSyncAdapter(this);
 
+        getLoaderManager().initLoader(0, null, this);
     }
 
     @Override
@@ -80,22 +98,34 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateMovies() {
-        new FetchMovieTask(this, new FetchMoviesTaskCompleteListener()).execute("");
-
+        MovieSyncAdapter.syncImmediately(MainActivity.this);
     }
 
-    private class FetchMoviesTaskCompleteListener implements AssyncTaskCompletListener<List<Movie>>
-    {
 
-        @Override
-        public void onTaskComplete(List<Movie> result) {
-            mMovies.clear();
-            mMovies.addAll(result);
-            mMovieAdapter.notifyDataSetChanged();
+    @Override
+    public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        String sortOrder = MovieContract.MovieEntry.COLUMN_TITLE + " ASC";
+
+        Uri allMoviesUri = MovieContract.MovieEntry.CONTENT_URI;
+
+        return new CursorLoader(MainActivity.this,
+                allMoviesUri,
+                null,
+                null,
+                null,
+                sortOrder);
+    }
+
+    @Override
+    public void onLoadFinished(android.content.Loader<Cursor> loader, Cursor data) {
+        mMovieAdapter.swapCursor(data);
+        if (mPosition != ListView.INVALID_POSITION) {
+            mMovieGridView.smoothScrollToPosition(mPosition);
         }
     }
 
-
-
-
+    @Override
+    public void onLoaderReset(android.content.Loader<Cursor> loader) {
+        mMovieAdapter.swapCursor(null);
+    }
 }
