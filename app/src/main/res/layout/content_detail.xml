@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/content_detail"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/holo_blue_dark"
@@ -14,97 +15,147 @@
     tools:context="br.com.sandclan.moviesinthesky.view.activity.DetailActivity"
     tools:showIn="@layout/activity_detail">
 
-    <ScrollView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_height="wrap_content">
 
             <ImageView
                 android:id="@+id/imageview_detail_poster"
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/detail_screen_poster_width" />
+                android:layout_height="@dimen/detail_screen_poster_width"
+                android:contentDescription="@string/movie_poster" />
+            <ImageView
+                android:id="@+id/imageview_favourite"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@drawable/normal"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentBottom="true"
+                android:onClick="favourite"
+                android:contentDescription="@string/movie_poster" />
+        </RelativeLayout>
 
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/detail_rate_layout_margin_top"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/rate"
-
-                    android:textColor="@android:color/white"
-                    android:textSize="@dimen/detail_rate_text_size" />
-
-                <TextView
-                    android:id="@+id/textview_detail_rate_value"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/detail_rate_value_margin_start"
-                    android:layout_marginStart="@dimen/detail_rate_value_margin_start"
-                    android:textColor="@android:color/white"
-                    android:textSize="@dimen/detail_rate_text_size" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/detail_rate_layout_margin_top"
-                android:orientation="horizontal">
-                <TextView
-                    android:id="@+id/textview_original_title_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@android:color/white"
-                    android:text="@string/original_title"
-                    android:textSize="@dimen/detail_original_title_text_size" />
-
-                <TextView
-                    android:id="@+id/textview_original_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/detail_rate_value_margin_start"
-                    android:layout_marginStart="@dimen/detail_rate_value_margin_start"
-                    android:textColor="@android:color/white"
-                    android:textSize="@dimen/detail_original_title_text_size" />
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/detail_rate_layout_margin_top"
-                android:orientation="horizontal">
-                <TextView
-                    android:id="@+id/textview_release_date_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@android:color/white"
-                    android:text="@string/release_date"
-                    android:textSize="@dimen/detail_original_title_text_size" />
-
-                <TextView
-                    android:id="@+id/textview_release_date"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="@dimen/detail_rate_value_margin_start"
-                    android:layout_marginStart="@dimen/detail_rate_value_margin_start"
-                    android:textColor="@android:color/white"
-                    android:textSize="@dimen/detail_original_title_text_size" />
-            </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/detail_rate_layout_margin_top"
+            android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/textview_summary"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/detail_summary_text_margin_top"
+                android:text="@string/rate"
                 android:textColor="@android:color/white"
-                android:textSize="@dimen/detail_summary_text_size" />
+                android:textSize="@dimen/detail_rate_text_size" />
+
+            <TextView
+                android:id="@+id/textview_detail_rate_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/detail_rate_value_margin_start"
+                android:layout_marginStart="@dimen/detail_rate_value_margin_start"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/detail_rate_text_size" />
+
         </LinearLayout>
-    </ScrollView>
-</FrameLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/detail_rate_layout_margin_top"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/textview_original_title_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/original_title"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/detail_original_title_text_size" />
+
+            <TextView
+                android:id="@+id/textview_original_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/detail_rate_value_margin_start"
+                android:layout_marginStart="@dimen/detail_rate_value_margin_start"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/detail_original_title_text_size" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/detail_rate_layout_margin_top"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/textview_release_date_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/release_date"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/detail_original_title_text_size" />
+
+            <TextView
+                android:id="@+id/textview_release_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/detail_rate_value_margin_start"
+                android:layout_marginStart="@dimen/detail_rate_value_margin_start"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/detail_original_title_text_size" />
+        </LinearLayout>
+
+
+        <TextView
+            android:id="@+id/textview_trailer_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/trailer"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/detail_original_title_text_size" />
+
+        <ImageView
+            android:id="@+id/imageview_trailer"
+            android:layout_width="@dimen/trailer_icon_width"
+            android:layout_height="@dimen/trailer_icon_height"
+            android:layout_gravity="center_horizontal"
+            android:contentDescription="@string/trailer_icon"
+            android:onClick="callYoutube"
+            android:src="@drawable/image_not_found" />
+
+        <TextView
+            android:id="@+id/textview_summary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/detail_summary_text_margin_top"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/detail_summary_text_size" />
+
+        <TextView
+            android:id="@+id/textview_user_review_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/detail_summary_text_margin_top"
+            android:text="@string/user_reviews"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/detail_original_title_text_size" />
+
+        <TextView
+            android:id="@+id/textview_users_review"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/detail_summary_text_margin_top"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/detail_summary_text_size" />
+
+
+    </LinearLayout>
+</ScrollView>
