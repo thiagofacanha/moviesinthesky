@@ -18,26 +18,15 @@ import android.widget.ListView;
 import br.com.sandclan.moviesinthesky.R;
 import br.com.sandclan.moviesinthesky.Util.Constants;
 import br.com.sandclan.moviesinthesky.adapter.MovieAdapter;
-import br.com.sandclan.moviesinthesky.data.MovieContract;
+import br.com.sandclan.moviesinthesky.data.MovieColumns;
+import br.com.sandclan.moviesinthesky.data.MovieProvider;
 import br.com.sandclan.moviesinthesky.entity.Movie;
 import br.com.sandclan.moviesinthesky.sync.MovieSyncAdapter;
 
-public class MainActivity extends AppCompatActivity   implements android.app.LoaderManager.LoaderCallbacks<Cursor> {
+public class MainActivity extends AppCompatActivity implements android.app.LoaderManager.LoaderCallbacks<Cursor> {
     private MovieAdapter mMovieAdapter;
     private GridView mMovieGridView;
-    private static final String[] MOVIE_COLUMNS = {
-            MovieContract.MovieEntry._ID,
-            MovieContract.MovieEntry.COLUMN_ID_FROM_MOVIEDBAPI,
-            MovieContract.MovieEntry.COLUMN_TITLE,
-            MovieContract.MovieEntry.COLUMN_ORIGINAL_TITLE,
-            MovieContract.MovieEntry.COLUMN_IMAGE_URL,
-            MovieContract.MovieEntry.COLUMN_SYNOPSIS,
-            MovieContract.MovieEntry.COLUMN_RELEASE_DATE,
-            MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE,
-            MovieContract.MovieEntry.COLUMN_USER_REVIEWS,
-            MovieContract.MovieEntry.COLUMN_TRAILER_CODE_ID,
-            MovieContract.MovieEntry.COLUMN_FAVOURITE
-    };
+
     private int mPosition = ListView.INVALID_POSITION;
 
     @Override
@@ -49,13 +38,13 @@ public class MainActivity extends AppCompatActivity   implements android.app.Loa
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mMovieAdapter = new MovieAdapter(MainActivity.this, null,0);
+        mMovieAdapter = new MovieAdapter(MainActivity.this, null, 0);
         mMovieGridView = (GridView) findViewById(R.id.gridview);
         mMovieGridView.setAdapter(mMovieAdapter);
         mMovieGridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Movie movie =  mMovieAdapter.getItem(position);
+                Movie movie = mMovieAdapter.getItem(position);
                 Intent detailIntent = new Intent(MainActivity.this, DetailActivity.class);
                 detailIntent.putExtra(Constants.MOVIE, movie);
                 startActivity(detailIntent);
@@ -104,9 +93,9 @@ public class MainActivity extends AppCompatActivity   implements android.app.Loa
 
     @Override
     public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        String sortOrder = MovieContract.MovieEntry.COLUMN_TITLE + " ASC";
+        String sortOrder = MovieColumns.TITLE + " ASC";
 
-        Uri allMoviesUri = MovieContract.MovieEntry.CONTENT_URI;
+        Uri allMoviesUri = MovieProvider.Movies.CONTENT_URI;
 
         return new CursorLoader(MainActivity.this,
                 allMoviesUri,

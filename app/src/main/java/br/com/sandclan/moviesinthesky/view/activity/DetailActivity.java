@@ -19,7 +19,6 @@ import br.com.sandclan.moviesinthesky.R;
 import br.com.sandclan.moviesinthesky.Util.Constants;
 import br.com.sandclan.moviesinthesky.assync.FetchMovieReviewsTask;
 import br.com.sandclan.moviesinthesky.assync.FetchMovieTrailerTask;
-import br.com.sandclan.moviesinthesky.data.MovieContract;
 import br.com.sandclan.moviesinthesky.entity.Movie;
 import br.com.sandclan.moviesinthesky.interfaces.AssyncTaskCompletListener;
 import butterknife.BindView;
@@ -110,11 +109,11 @@ public class DetailActivity extends AppCompatActivity {
 
     public void favourite(View view) {
         ContentValues contentValues = new ContentValues();
-        int result;
-        contentValues.put(MovieContract.MovieEntry.COLUMN_FAVOURITE, mMovie.isFavourite() ? 0 : 1);
-        String selectionClause = MovieContract.MovieEntry.COLUMN_ID_FROM_MOVIEDBAPI + "= ?";
-        String[] selectionArgs = {String.valueOf(mMovie.getIdAPI())};
-        result = getContentResolver().update(MovieContract.BASE_CONTENT_URI, contentValues, selectionClause, selectionArgs);
+        int result = 0;
+//        contentValues.put(MovieContract.MovieEntry.COLUMN_FAVOURITE, mMovie.isFavourite() ? 0 : 1);
+//        String selectionClause = MovieContract.MovieEntry.COLUMN_ID_FROM_MOVIEDBAPI + "= ?";
+//        String[] selectionArgs = {String.valueOf(mMovie.getIdAPI())};
+//        result = getContentResolver().update(MovieContract.BASE_CONTENT_URI, contentValues, selectionClause, selectionArgs);
 
         if (result > 0) {
             mMovie.setFavourite(!mMovie.isFavourite());

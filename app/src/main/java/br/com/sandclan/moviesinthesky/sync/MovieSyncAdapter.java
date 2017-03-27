@@ -32,7 +32,8 @@ import java.util.Vector;
 import br.com.sandclan.moviesinthesky.BuildConfig;
 import br.com.sandclan.moviesinthesky.R;
 import br.com.sandclan.moviesinthesky.Util.Constants;
-import br.com.sandclan.moviesinthesky.data.MovieContract;
+import br.com.sandclan.moviesinthesky.data.MovieColumns;
+import br.com.sandclan.moviesinthesky.data.MovieProvider;
 
 public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
 
@@ -153,16 +154,14 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
 
                 ContentValues movieValues = new ContentValues();
 
-                movieValues.put(MovieContract.MovieEntry.COLUMN_ID_FROM_MOVIEDBAPI, movieJSonObject.getString(Constants.JSON_ID));
-                movieValues.put(MovieContract.MovieEntry.COLUMN_TITLE, movieJSonObject.getString(Constants.JSON_TITLE));
-                movieValues.put(MovieContract.MovieEntry.COLUMN_ORIGINAL_TITLE, movieJSonObject.getString(Constants.JSON_ORIGINAL_TITLE));
-                movieValues.put(MovieContract.MovieEntry.COLUMN_IMAGE_URL,Constants.HTTP_IMAGE_TMDB_ORG_T_P_W500 + movieJSonObject.getString(Constants.JSON_POSTER_PATH));
-                movieValues.put(MovieContract.MovieEntry.COLUMN_SYNOPSIS, movieJSonObject.getString(Constants.JSON_OVERVIEW));
-                movieValues.put(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE, movieJSonObject.getDouble(Constants.JSON_VOTE_AVERAGE));
-                movieValues.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE, movieJSonObject.getString(Constants.JSON_RELEASE_DATE));
-                movieValues.put(MovieContract.MovieEntry.COLUMN_TRAILER_CODE_ID, 123);
-                movieValues.put(MovieContract.MovieEntry.COLUMN_USER_REVIEWS, "TBD");
-                movieValues.put(MovieContract.MovieEntry.COLUMN_FAVOURITE, 0);
+                movieValues.put(MovieColumns.ID_FROM_API, movieJSonObject.getString(Constants.JSON_ID));
+                movieValues.put(MovieColumns.TITLE, movieJSonObject.getString(Constants.JSON_TITLE));
+                movieValues.put(MovieColumns.ORIGINAL_TITLE, movieJSonObject.getString(Constants.JSON_ORIGINAL_TITLE));
+                movieValues.put(MovieColumns.IMAGE_URL,Constants.HTTP_IMAGE_TMDB_ORG_T_P_W500 + movieJSonObject.getString(Constants.JSON_POSTER_PATH));
+                movieValues.put(MovieColumns.SYNOPSIS, movieJSonObject.getString(Constants.JSON_OVERVIEW));
+                movieValues.put(MovieColumns.VOTE_AVERAGE, movieJSonObject.getDouble(Constants.JSON_VOTE_AVERAGE));
+                movieValues.put(MovieColumns.RELEASE_DATE, movieJSonObject.getString(Constants.JSON_RELEASE_DATE));
+                movieValues.put(MovieColumns.FAVOURITE, 0);
 
                 cVVector.add(movieValues);
             }
@@ -172,10 +171,9 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
                 ContentValues[] cvArray = new ContentValues[cVVector.size()];
                 cVVector.toArray(cvArray);
                 // deleting old data
-                getContext().getContentResolver().delete(MovieContract.MovieEntry.CONTENT_URI,
-                        MovieContract.MovieEntry._ID + " >= 0", null);
 
-                getContext().getContentResolver().bulkInsert(MovieContract.MovieEntry.CONTENT_URI, cvArray);
+
+                getContext().getContentResolver().bulkInsert(MovieProvider.Movies.CONTENT_URI, cvArray);
             }
 
             Log.d("MovieInTheSky", "Sync Complete. " + cVVector.size() + " Inserted");
@@ -208,7 +206,7 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
         ContentResolver.requestSync(getSyncAccount(context),
-                context.getString(R.string.content_authority), bundle);
+                MovieProvider.AUTHORITY, bundle);
     }
 
     public static Account getSyncAccount(Context context) {

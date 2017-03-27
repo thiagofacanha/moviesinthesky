@@ -38,12 +38,6 @@
             android:label="@string/title_activity_detail"
             android:theme="@style/AppTheme.NoActionBar" />
 
-        <provider
-            android:authorities="@string/content_authority"
-            android:name=".data.MovieProvider"
-            android:exported="false"
-            android:syncable="true" />
-
 
         <service android:name=".sync.MovieAuthenticatorService">
             <intent-filter>
@@ -64,8 +58,14 @@
                 android:name="android.content.SyncAdapter"
                 android:resource="@xml/syncadapter" />
         </service>
-    </application>
 
+        <provider
+            android:name="br.com.sandclan.moviesinthesky.data.generated.MovieProvider"
+            android:authorities="br.com.sandclan.moviesinthesky.data.MovieProvider"
+            android:exported="false"
+            android:syncable="true" />
+
+    </application>
 
 
 </manifest>
