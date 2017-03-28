@@ -20,6 +20,12 @@ public class Constants {
     public static final String JSON_RELEASE_DATE = "release_date";
     public static final String JSON_REVIEW_AUTHOR = "author";
     public static final String JSON_REVIEW_CONTENT = "content";
+    public static final String JSON_TRAILER_ID = "id";
+    public static final String JSON_TRAILER_NAME = "name";
+    public static final String JSON_TRAILER_SITE = "site";
+    public static final String JSON_TRAILER_TYPE = "type";
+    public static final String JSON_TRAILER_SIZE = "size";
+    public static final String JSON_TRAILER_LANGUAGE= "iso_639_1";
 
 
 

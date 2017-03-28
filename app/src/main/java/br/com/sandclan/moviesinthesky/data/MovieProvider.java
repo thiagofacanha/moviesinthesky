@@ -47,6 +47,28 @@ public final class MovieProvider {
         public static Uri withId(long id) {
             return buildUri(Path.MOVIES, String.valueOf(id));
         }
+
+        @InexactContentUri(
+                name = "FAVOURITE",
+                path = Path.MOVIES + "favourite/#",
+                type = "vnd.android.cursor.item/movie",
+                whereColumn = MovieColumns.FAVOURITE,
+                pathSegment = 1)
+
+        public static Uri withFavourite(int favourite) {
+            return buildUri(Path.MOVIES, String.valueOf(favourite));
+        }
+
+        @InexactContentUri(
+                name = "MOVIE_FAVOURITE",
+                path = Path.MOVIES + "id/#/favourite/#",
+                type = "vnd.android.cursor.item/movie",
+                whereColumn = {MovieColumns._ID,MovieColumns.FAVOURITE},
+                pathSegment = {1,2})
+
+        public static Uri withIdAndFavourite(long id,int favourite) {
+            return buildUri(Path.MOVIES, String.valueOf(id),String.valueOf(favourite));
+        }
     }
 
 

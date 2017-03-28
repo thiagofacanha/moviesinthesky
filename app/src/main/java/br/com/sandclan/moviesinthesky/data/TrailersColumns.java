@@ -16,6 +16,10 @@ public interface TrailersColumns {
     @AutoIncrement
     String _ID = "_id";
 
+    @DataType(TEXT)
+    @NotNull
+    String ID_FROM_API = "id_from_api";
+
     @DataType(INTEGER)
     @NotNull
     String MOVIE_ID = "movie_id";

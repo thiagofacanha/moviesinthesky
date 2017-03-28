@@ -9,7 +9,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -18,7 +17,9 @@ import java.util.List;
 import br.com.sandclan.moviesinthesky.R;
 import br.com.sandclan.moviesinthesky.Util.Constants;
 import br.com.sandclan.moviesinthesky.assync.FetchMovieReviewsTask;
-import br.com.sandclan.moviesinthesky.assync.FetchMovieTrailerTask;
+import br.com.sandclan.moviesinthesky.data.MovieColumns;
+import br.com.sandclan.moviesinthesky.data.MovieProvider;
+import br.com.sandclan.moviesinthesky.data.TrailersColumns;
 import br.com.sandclan.moviesinthesky.entity.Movie;
 import br.com.sandclan.moviesinthesky.interfaces.AssyncTaskCompletListener;
 import butterknife.BindView;
@@ -65,7 +66,6 @@ public class DetailActivity extends AppCompatActivity {
             originalTitle.setText(mMovie.getOriginalTitle());
             rateValue.setText(mMovie.getVoteAverage().toString());
             releaseDate.setText(mMovie.getReleaseDate());
-            new FetchMovieTrailerTask(this, new FetchTrailersTaskCompleteListener()).execute(mMovie.getIdAPI());
             new FetchMovieReviewsTask(this, new FetchReviewTaskCompleteListener()).execute(mMovie.getIdAPI());
         }
 
@@ -108,19 +108,12 @@ public class DetailActivity extends AppCompatActivity {
     }
 
     public void favourite(View view) {
-        ContentValues contentValues = new ContentValues();
-        int result = 0;
-//        contentValues.put(MovieContract.MovieEntry.COLUMN_FAVOURITE, mMovie.isFavourite() ? 0 : 1);
-//        String selectionClause = MovieContract.MovieEntry.COLUMN_ID_FROM_MOVIEDBAPI + "= ?";
-//        String[] selectionArgs = {String.valueOf(mMovie.getIdAPI())};
-//        result = getContentResolver().update(MovieContract.BASE_CONTENT_URI, contentValues, selectionClause, selectionArgs);
-
-        if (result > 0) {
-            mMovie.setFavourite(!mMovie.isFavourite());
-            favouriteIcon.setBackgroundResource(mMovie.isFavourite() ? R.drawable.favourite : R.drawable.normal);
-        } else {
-            Toast.makeText(DetailActivity.this, "Error updating database!", Toast.LENGTH_LONG).show();
-        }
+        ContentValues values = new ContentValues();
+        values.put(MovieColumns.FAVOURITE,favouriteIcon.getBackground() == getDrawable(R.drawable.favourite) ? "1" : "0");
+        favouriteIcon.setBackgroundResource(mMovie.isFavourite() ? R.drawable.favourite : R.drawable.normal);
+        String whereString = MovieColumns.ID_FROM_API + " =  " + mMovie.getIdAPI();
+        getContentResolver().update(MovieProvider.Movies.CONTENT_URI, values, whereString, null);
+        mMovie.setFavourite(!mMovie.isFavourite());
     }
 
 

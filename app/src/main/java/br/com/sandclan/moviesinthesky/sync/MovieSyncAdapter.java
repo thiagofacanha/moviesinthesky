@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SyncRequest;
 import android.content.SyncResult;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -27,6 +28,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 import br.com.sandclan.moviesinthesky.BuildConfig;
@@ -34,12 +37,16 @@ import br.com.sandclan.moviesinthesky.R;
 import br.com.sandclan.moviesinthesky.Util.Constants;
 import br.com.sandclan.moviesinthesky.data.MovieColumns;
 import br.com.sandclan.moviesinthesky.data.MovieProvider;
+import br.com.sandclan.moviesinthesky.data.TrailersColumns;
+
+import static br.com.sandclan.moviesinthesky.data.MovieColumns.FAVOURITE;
 
 public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
 
 
     public static final int SYNC_INTERVAL = 60 * 60 * 24;
-    public static final int SYNC_FLEXTIME = SYNC_INTERVAL/3;
+    public static final int SYNC_FLEXTIME = SYNC_INTERVAL / 3;
+    private final String FALSE_VALUE = "0";
 
     public MovieSyncAdapter(Context context, boolean autoInitialize) {
 
@@ -75,7 +82,6 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
 
             URL url = new URL(builtUri.toString());
 
-            // Create the request to OpenWeatherMap, and open the connection
             urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestMethod("GET");
             urlConnection.connect();
@@ -109,11 +115,8 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
 
         } catch (IOException e) {
             Log.e("MovieInTheSky", "Error ", e);
-            // If the code didn't successfully get the weather data, there's no point in attempting
-            // to parse it.
         } catch (JSONException e) {
             Log.e("MovieInTheSky", e.getMessage(), e);
-            e.printStackTrace();
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
@@ -140,48 +143,243 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
             JSONObject resultJsonObject = new JSONObject(JsonStr);
             JSONArray moviesArray = resultJsonObject.getJSONArray(Constants.RESULTS);
 
-
-            // Insert the new weather information into the database
             Vector<ContentValues> cVVector = new Vector<ContentValues>(moviesArray.length());
-
-
+            if (moviesArray.length() > 0) {
+                // deleting movies not favourites
+                String whereString = MovieColumns.FAVOURITE + " = 0";
+                getContext().getContentResolver().delete(MovieProvider.Movies.CONTENT_URI, whereString, null);
+            }
             for (int i = 0; i < moviesArray.length(); i++) {
                 // These are the values that will be collected.
-
-
-                // Get the JSON object representing the day
                 JSONObject movieJSonObject = moviesArray.getJSONObject(i);
 
-                ContentValues movieValues = new ContentValues();
+                String whereString = MovieColumns._ID + " =  ? AND " + MovieColumns.FAVOURITE + " = ? ";
+                String[] values = {movieJSonObject.getString(Constants.JSON_ID), "1"};
 
-                movieValues.put(MovieColumns.ID_FROM_API, movieJSonObject.getString(Constants.JSON_ID));
-                movieValues.put(MovieColumns.TITLE, movieJSonObject.getString(Constants.JSON_TITLE));
-                movieValues.put(MovieColumns.ORIGINAL_TITLE, movieJSonObject.getString(Constants.JSON_ORIGINAL_TITLE));
-                movieValues.put(MovieColumns.IMAGE_URL,Constants.HTTP_IMAGE_TMDB_ORG_T_P_W500 + movieJSonObject.getString(Constants.JSON_POSTER_PATH));
-                movieValues.put(MovieColumns.SYNOPSIS, movieJSonObject.getString(Constants.JSON_OVERVIEW));
-                movieValues.put(MovieColumns.VOTE_AVERAGE, movieJSonObject.getDouble(Constants.JSON_VOTE_AVERAGE));
-                movieValues.put(MovieColumns.RELEASE_DATE, movieJSonObject.getString(Constants.JSON_RELEASE_DATE));
-                movieValues.put(MovieColumns.FAVOURITE, 0);
 
-                cVVector.add(movieValues);
+                Cursor existFavouriteItem = getContext().getContentResolver().query(MovieProvider.Movies.CONTENT_URI, null, whereString, values, null);
+
+                if (existFavouriteItem.getCount() == 0) {
+
+                    ContentValues movieValues = new ContentValues();
+
+                    movieValues.put(MovieColumns.ID_FROM_API, movieJSonObject.getString(Constants.JSON_ID));
+                    movieValues.put(MovieColumns.TITLE, movieJSonObject.getString(Constants.JSON_TITLE));
+                    movieValues.put(MovieColumns.ORIGINAL_TITLE, movieJSonObject.getString(Constants.JSON_ORIGINAL_TITLE));
+                    movieValues.put(MovieColumns.IMAGE_URL, Constants.HTTP_IMAGE_TMDB_ORG_T_P_W500 + movieJSonObject.getString(Constants.JSON_POSTER_PATH));
+                    movieValues.put(MovieColumns.SYNOPSIS, movieJSonObject.getString(Constants.JSON_OVERVIEW));
+                    movieValues.put(MovieColumns.VOTE_AVERAGE, movieJSonObject.getDouble(Constants.JSON_VOTE_AVERAGE));
+                    movieValues.put(MovieColumns.RELEASE_DATE, movieJSonObject.getString(Constants.JSON_RELEASE_DATE));
+                    movieValues.put(FAVOURITE, 0);
+
+                    cVVector.add(movieValues);
+                    requestReviewFromMovie(movieJSonObject.getInt(Constants.JSON_ID));
+                    requestTraillersFromMovie(movieJSonObject.getInt(Constants.JSON_ID));
+                }
+                existFavouriteItem.close();
             }
 
             // add to database
             if (cVVector.size() > 0) {
                 ContentValues[] cvArray = new ContentValues[cVVector.size()];
                 cVVector.toArray(cvArray);
-                // deleting old data
-
-
+                //Inserting new movies
                 getContext().getContentResolver().bulkInsert(MovieProvider.Movies.CONTENT_URI, cvArray);
             }
-
             Log.d("MovieInTheSky", "Sync Complete. " + cVVector.size() + " Inserted");
-
         } catch (JSONException e) {
             Log.e("MovieInTheSky", e.getMessage(), e);
-            e.printStackTrace();
         }
+    }
+
+    private void requestReviewFromMovie(int movieId) {
+        if (movieId == 0) {
+            return;
+        }
+        HttpURLConnection urlConnection;
+        BufferedReader reader;
+        // Will contain the raw JSON response as a string.
+        String movieJsonStr;
+
+        try {
+
+            SharedPreferences sharedPrefs =
+                    PreferenceManager.getDefaultSharedPreferences(getContext());
+
+
+            final String MOVIE_BASE_URL =
+                    "https://api.themoviedb.org/3/movie/" + movieId + "/reviews";
+            final String API_KEY = "api_key";
+
+            Uri builtUri = Uri.parse(MOVIE_BASE_URL).buildUpon()
+                    .appendQueryParameter(API_KEY, BuildConfig.API_KEY)
+                    .build();
+
+            URL url = new URL(builtUri.toString());
+
+            // Create the request to OpenWeatherMap, and open the connection
+            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestMethod("GET");
+            urlConnection.connect();
+
+            // Read the input stream into a String
+            InputStream inputStream = urlConnection.getInputStream();
+            StringBuffer buffer = new StringBuffer();
+            if (inputStream == null) {
+                // Nothing to do.
+                return;
+            }
+
+            reader = new BufferedReader(new InputStreamReader(inputStream));
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
+                // But it does make debugging a *lot* easier if you print out the completed
+                // buffer for debugging.
+                buffer.append(line + "\n");
+            }
+
+            if (buffer.length() == 0) {
+                // Stream was empty.  No point in parsing.
+                return;
+            }
+            movieJsonStr = buffer.toString();
+            Log.d("MovieInTheSky", movieJsonStr);
+
+            saveMovieReviewFromJsonInDB(movieJsonStr);
+
+        } catch (Exception e) {
+            Log.d("MovieInTheSky", e.getMessage());
+        }
+    }
+
+    private static void saveMovieReviewFromJsonInDB(String movieJsonStr) {
+//        List<String> reviews = new ArrayList<>();
+//        JSONObject resultJsonObject = new JSONObject(movieJsonStr);
+//        JSONArray videoObjects = resultJsonObject.getJSONArray(Constants.RESULTS);
+//
+//
+//        for (int i = 0; i < videoObjects.length(); i++) {
+//            JSONObject movieJSonObject = videoObjects.getJSONObject(i);
+//            reviews.add(movieJSonObject.getString(Constants.JSON_REVIEW_AUTHOR) + " : " + movieJSonObject.getString(Constants.JSON_REVIEW_CONTENT));
+//        }
+
+    }
+
+
+    private void requestTraillersFromMovie(int movieId) {
+        if (movieId == 0) {
+            return;
+        }
+        HttpURLConnection urlConnection;
+        BufferedReader reader;
+        List<String> trailers = new ArrayList<>();
+
+        // Will contain the raw JSON response as a string.
+        String movieJsonStr;
+
+        try {
+
+            SharedPreferences sharedPrefs =
+                    PreferenceManager.getDefaultSharedPreferences(getContext());
+            String sortOrder = sharedPrefs.getString(getContext().getString(R.string.pref_order_by_key),
+                    getContext().getString(R.string.popularity_value));
+
+            final String MOVIE_BASE_URL =
+                    "https://api.themoviedb.org/3/movie/" + movieId + "/videos";
+            final String LANGUAGE = "language";
+            final String API_KEY = "api_key";
+
+            Uri builtUri = Uri.parse(MOVIE_BASE_URL).buildUpon()
+                    .appendQueryParameter(API_KEY, BuildConfig.API_KEY)
+                    //    .appendQueryParameter(LANGUAGE, "pt-BR")
+                    .build();
+
+            URL url = new URL(builtUri.toString());
+
+            // Create the request to OpenWeatherMap, and open the connection
+            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestMethod("GET");
+            urlConnection.connect();
+
+            // Read the input stream into a String
+            InputStream inputStream = urlConnection.getInputStream();
+            StringBuffer buffer = new StringBuffer();
+            if (inputStream == null) {
+                // Nothing to do.
+                return;
+            }
+
+            reader = new BufferedReader(new InputStreamReader(inputStream));
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                // Since it's JSON, adding a newline isn't necessary (it won't affect parsing)
+                // But it does make debugging a *lot* easier if you print out the completed
+                // buffer for debugging.
+                buffer.append(line + "\n");
+            }
+
+            if (buffer.length() == 0) {
+                // Stream was empty.  No point in parsing.
+                return;
+            }
+            movieJsonStr = buffer.toString();
+            Log.d("MovieInTheSky", movieJsonStr);
+
+
+            saveMovieTraillersFromJsonInDB(movieId, movieJsonStr);
+
+        } catch (Exception e) {
+            Log.e("MovieInTheSky", e.getMessage());
+        }
+    }
+
+    private void saveMovieTraillersFromJsonInDB(int movieId, String JsonStr) {
+        JSONObject resultJsonObject = null;
+        JSONArray videoObjects = null;
+        try {
+            resultJsonObject = new JSONObject(JsonStr);
+            videoObjects = resultJsonObject.getJSONArray(Constants.RESULTS);
+            Vector<ContentValues> cVVector = new Vector<ContentValues>(videoObjects.length());
+            for (int i = 0; i < videoObjects.length(); i++) {
+                JSONObject movieJSonObject = videoObjects.getJSONObject(i);
+                ContentValues trailersValues = new ContentValues();
+
+                trailersValues.put(TrailersColumns.MOVIE_ID, movieId);
+                trailersValues.put(TrailersColumns.ID_FROM_API, movieJSonObject.getString(Constants.JSON_TRAILER_ID));
+                trailersValues.put(TrailersColumns.KEY, movieJSonObject.getString(Constants.KEY));
+                trailersValues.put(TrailersColumns.NAME, movieJSonObject.getString(Constants.JSON_TRAILER_NAME));
+                trailersValues.put(TrailersColumns.LANGUAGE, movieJSonObject.getString(Constants.JSON_TRAILER_LANGUAGE));
+                trailersValues.put(TrailersColumns.SITE, movieJSonObject.getString(Constants.JSON_TRAILER_SITE));
+                trailersValues.put(TrailersColumns.SIZE, movieJSonObject.getString(Constants.JSON_TRAILER_SIZE));
+                trailersValues.put(TrailersColumns.TYPE, movieJSonObject.getString(Constants.JSON_TRAILER_TYPE));
+
+
+                String whereString = TrailersColumns.ID_FROM_API + " =  ? ";
+                String[] values = {movieJSonObject.getString(Constants.JSON_TRAILER_ID), "1"};
+
+
+                Cursor existTrailers = getContext().getContentResolver().query(MovieProvider.Trailers.CONTENT_URI, null, whereString, values, null);
+
+                if (existTrailers.getCount() == 0) {
+                    cVVector.add(trailersValues);
+                    existTrailers.close();
+                }
+                if (cVVector.size() > 0) {
+                    ContentValues[] cvArray = new ContentValues[cVVector.size()];
+                    cVVector.toArray(cvArray);
+                    //Inserting new trailers
+                    getContext().getContentResolver().bulkInsert(MovieProvider.Trailers.CONTENT_URI, cvArray);
+                }
+
+            }
+
+        } catch (JSONException e) {
+            Log.e("MovieInTheSky", e.getMessage());
+        }
+
     }
 
 
@@ -219,7 +417,7 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
                 context.getString(R.string.app_name), context.getString(R.string.sync_account_type));
 
         // If the password doesn't exist, the account doesn't exist
-        if ( null == accountManager.getPassword(newAccount) ) {
+        if (null == accountManager.getPassword(newAccount)) {
 
         /*
          * Add the account and account type, no password or user data
