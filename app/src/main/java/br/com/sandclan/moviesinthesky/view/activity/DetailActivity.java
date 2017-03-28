@@ -2,6 +2,7 @@ package br.com.sandclan.moviesinthesky.view.activity;
 
 import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -19,6 +20,7 @@ import br.com.sandclan.moviesinthesky.Util.Constants;
 import br.com.sandclan.moviesinthesky.assync.FetchMovieReviewsTask;
 import br.com.sandclan.moviesinthesky.data.MovieColumns;
 import br.com.sandclan.moviesinthesky.data.MovieProvider;
+import br.com.sandclan.moviesinthesky.data.TrailersColumns;
 import br.com.sandclan.moviesinthesky.entity.Movie;
 import br.com.sandclan.moviesinthesky.interfaces.AssyncTaskCompletListener;
 import butterknife.BindView;
@@ -61,14 +63,13 @@ public class DetailActivity extends AppCompatActivity {
         if (intent != null && intent.hasExtra(Constants.MOVIE)) {
             mMovie = (Movie) intent.getSerializableExtra(Constants.MOVIE);
 
-        //    Cursor cursor = getContentResolver().query(MovieProvider.Movies.CONTENT_URI,null,MovieColumns.ID_FROM_API + " = ? ", new String[]{String.valueOf(mMovie.getIdAPI())},null);
-
             setTitle(mMovie.getTitle());
             Picasso.with(this).load(mMovie.getImageUrl()).error(R.drawable.image_not_found).placeholder(R.drawable.image_not_found).into(poster);
             summary.setText(mMovie.getSynopsis());
             originalTitle.setText(mMovie.getOriginalTitle());
             rateValue.setText(mMovie.getVoteAverage().toString());
             releaseDate.setText(mMovie.getReleaseDate());
+            fillTrailersInfo(mMovie.getIdAPI());
             new FetchMovieReviewsTask(this, new FetchReviewTaskCompleteListener()).execute(mMovie.getIdAPI());
         }
 
@@ -80,19 +81,18 @@ public class DetailActivity extends AppCompatActivity {
 
     }
 
-    private class FetchTrailersTaskCompleteListener implements AssyncTaskCompletListener<List<String>> {
+    private void fillTrailersInfo(int movieID) {
+        String whereString = TrailersColumns.MOVIE_ID + " = ?";
+        String[] values = {String.valueOf(movieID)};
+        Cursor trailers = getContentResolver().query(MovieProvider.Trailers.CONTENT_URI,null,whereString,values,null);
 
-        @Override
-        public void onTaskComplete(List<String> result) {
-            mTrailers = result;
-            if (mTrailers.size() > 0) {
-                mTrailerUrl = mTrailers.get(0);
-            } else {
-                trailerIcon.setClickable(false);
-            }
-            Picasso.with(DetailActivity.this).load(String.format(Constants.BASIC_YOUTUBE_THUMB_URL, mTrailerUrl)).error(R.drawable.image_not_found).placeholder(R.drawable.image_not_found).into(trailerIcon);
-
+        if(trailers !=null && trailers.moveToFirst()){
+            mTrailerUrl = trailers.getString(trailers.getColumnIndex(TrailersColumns.KEY));
+        } else {
+            trailerIcon.setClickable(false);
         }
+        Picasso.with(DetailActivity.this).load(String.format(Constants.BASIC_YOUTUBE_THUMB_URL, mTrailerUrl)).error(R.drawable.image_not_found).placeholder(R.drawable.image_not_found).into(trailerIcon);
+        trailers.close();
     }
 
     private class FetchReviewTaskCompleteListener implements AssyncTaskCompletListener<List<String>> {
@@ -114,7 +114,7 @@ public class DetailActivity extends AppCompatActivity {
         ContentValues values = new ContentValues();
         mMovie.setFavourite(!mMovie.isFavourite());
         favouriteIcon.setBackgroundResource(mMovie.isFavourite() ? R.drawable.favourite : R.drawable.normal);
-        values.put(MovieColumns.FAVOURITE,mMovie.isFavourite() ? FAVOURITE : UNFAVOURITE);
+        values.put(MovieColumns.FAVOURITE, mMovie.isFavourite() ? FAVOURITE : UNFAVOURITE);
         String whereString = MovieColumns.ID_FROM_API + " =  " + mMovie.getIdAPI();
         getContentResolver().update(MovieProvider.Movies.CONTENT_URI, values, whereString, null);
 

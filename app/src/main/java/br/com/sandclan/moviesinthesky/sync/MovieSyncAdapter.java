@@ -149,8 +149,8 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
                 // These are the values that will be collected.
                 JSONObject movieJSonObject = moviesArray.getJSONObject(i);
 
-                String whereString = MovieColumns.ID_FROM_API + " =  ? AND " + MovieColumns.FAVOURITE + " = ? ";
-                String[] values = {movieJSonObject.getString(Constants.JSON_ID), "1"};
+                String whereString = MovieColumns.ID_FROM_API + " =  ?  ";
+                String[] values = {movieJSonObject.getString(Constants.JSON_ID)};
 
 
                 Cursor existFavouriteItem = getContext().getContentResolver().query(MovieProvider.Movies.CONTENT_URI, null, whereString, values, null);
@@ -354,7 +354,7 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
 
 
                 String whereString = TrailersColumns.ID_FROM_API + " =  ? ";
-                String[] values = {movieJSonObject.getString(Constants.JSON_TRAILER_ID), "1"};
+                String[] values = {movieJSonObject.getString(Constants.JSON_TRAILER_ID)};
 
 
                 Cursor existTrailers = getContext().getContentResolver().query(MovieProvider.Trailers.CONTENT_URI, null, whereString, values, null);
@@ -369,8 +369,8 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
                     //Inserting new trailers
                     getContext().getContentResolver().bulkInsert(MovieProvider.Trailers.CONTENT_URI, cvArray);
                 }
+             }
 
-            }
 
         } catch (JSONException e) {
             Log.e("MovieInTheSky", e.getMessage());
