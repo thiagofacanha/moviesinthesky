@@ -19,7 +19,6 @@ import br.com.sandclan.moviesinthesky.Util.Constants;
 import br.com.sandclan.moviesinthesky.assync.FetchMovieReviewsTask;
 import br.com.sandclan.moviesinthesky.data.MovieColumns;
 import br.com.sandclan.moviesinthesky.data.MovieProvider;
-import br.com.sandclan.moviesinthesky.data.TrailersColumns;
 import br.com.sandclan.moviesinthesky.entity.Movie;
 import br.com.sandclan.moviesinthesky.interfaces.AssyncTaskCompletListener;
 import butterknife.BindView;
@@ -48,6 +47,8 @@ public class DetailActivity extends AppCompatActivity {
     TextView userReview;
 
     private String mTrailerUrl;
+    private String FAVOURITE = "1";
+    private String UNFAVOURITE = "0";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +60,8 @@ public class DetailActivity extends AppCompatActivity {
         Intent intent = this.getIntent();
         if (intent != null && intent.hasExtra(Constants.MOVIE)) {
             mMovie = (Movie) intent.getSerializableExtra(Constants.MOVIE);
+
+        //    Cursor cursor = getContentResolver().query(MovieProvider.Movies.CONTENT_URI,null,MovieColumns.ID_FROM_API + " = ? ", new String[]{String.valueOf(mMovie.getIdAPI())},null);
 
             setTitle(mMovie.getTitle());
             Picasso.with(this).load(mMovie.getImageUrl()).error(R.drawable.image_not_found).placeholder(R.drawable.image_not_found).into(poster);
@@ -109,11 +112,12 @@ public class DetailActivity extends AppCompatActivity {
 
     public void favourite(View view) {
         ContentValues values = new ContentValues();
-        values.put(MovieColumns.FAVOURITE,favouriteIcon.getBackground() == getDrawable(R.drawable.favourite) ? "1" : "0");
+        mMovie.setFavourite(!mMovie.isFavourite());
         favouriteIcon.setBackgroundResource(mMovie.isFavourite() ? R.drawable.favourite : R.drawable.normal);
+        values.put(MovieColumns.FAVOURITE,mMovie.isFavourite() ? FAVOURITE : UNFAVOURITE);
         String whereString = MovieColumns.ID_FROM_API + " =  " + mMovie.getIdAPI();
         getContentResolver().update(MovieProvider.Movies.CONTENT_URI, values, whereString, null);
-        mMovie.setFavourite(!mMovie.isFavourite());
+
     }
 
 

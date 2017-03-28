@@ -44,9 +44,8 @@ import static br.com.sandclan.moviesinthesky.data.MovieColumns.FAVOURITE;
 public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
 
 
-    public static final int SYNC_INTERVAL = 60 * 60 * 24;
-    public static final int SYNC_FLEXTIME = SYNC_INTERVAL / 3;
-    private final String FALSE_VALUE = "0";
+    private static final int SYNC_INTERVAL = 60 * 60 * 24;
+    private static final int SYNC_FLEXTIME = SYNC_INTERVAL / 3;
 
     public MovieSyncAdapter(Context context, boolean autoInitialize) {
 
@@ -129,9 +128,6 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
                 }
             }
         }
-        return;
-
-
     }
 
 
@@ -143,7 +139,7 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
             JSONObject resultJsonObject = new JSONObject(JsonStr);
             JSONArray moviesArray = resultJsonObject.getJSONArray(Constants.RESULTS);
 
-            Vector<ContentValues> cVVector = new Vector<ContentValues>(moviesArray.length());
+            Vector<ContentValues> cVVector = new Vector<>(moviesArray.length());
             if (moviesArray.length() > 0) {
                 // deleting movies not favourites
                 String whereString = MovieColumns.FAVOURITE + " = 0";
@@ -153,13 +149,13 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
                 // These are the values that will be collected.
                 JSONObject movieJSonObject = moviesArray.getJSONObject(i);
 
-                String whereString = MovieColumns._ID + " =  ? AND " + MovieColumns.FAVOURITE + " = ? ";
+                String whereString = MovieColumns.ID_FROM_API + " =  ? AND " + MovieColumns.FAVOURITE + " = ? ";
                 String[] values = {movieJSonObject.getString(Constants.JSON_ID), "1"};
 
 
                 Cursor existFavouriteItem = getContext().getContentResolver().query(MovieProvider.Movies.CONTENT_URI, null, whereString, values, null);
 
-                if (existFavouriteItem.getCount() == 0) {
+                if (existFavouriteItem != null && existFavouriteItem.getCount() == 0) {
 
                     ContentValues movieValues = new ContentValues();
 
@@ -337,12 +333,12 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private void saveMovieTraillersFromJsonInDB(int movieId, String JsonStr) {
-        JSONObject resultJsonObject = null;
-        JSONArray videoObjects = null;
+        JSONObject resultJsonObject;
+        JSONArray videoObjects;
         try {
             resultJsonObject = new JSONObject(JsonStr);
             videoObjects = resultJsonObject.getJSONArray(Constants.RESULTS);
-            Vector<ContentValues> cVVector = new Vector<ContentValues>(videoObjects.length());
+            Vector<ContentValues> cVVector = new Vector<>(videoObjects.length());
             for (int i = 0; i < videoObjects.length(); i++) {
                 JSONObject movieJSonObject = videoObjects.getJSONObject(i);
                 ContentValues trailersValues = new ContentValues();
@@ -363,7 +359,7 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
 
                 Cursor existTrailers = getContext().getContentResolver().query(MovieProvider.Trailers.CONTENT_URI, null, whereString, values, null);
 
-                if (existTrailers.getCount() == 0) {
+                if (existTrailers != null && existTrailers.getCount() == 0) {
                     cVVector.add(trailersValues);
                     existTrailers.close();
                 }
