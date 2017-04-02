@@ -2,6 +2,7 @@ package br.com.sandclan.moviesinthesky.view.activity;
 
 import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -9,7 +10,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -17,11 +17,11 @@ import java.util.List;
 
 import br.com.sandclan.moviesinthesky.R;
 import br.com.sandclan.moviesinthesky.Util.Constants;
-import br.com.sandclan.moviesinthesky.assync.FetchMovieReviewsTask;
-import br.com.sandclan.moviesinthesky.assync.FetchMovieTrailerTask;
-import br.com.sandclan.moviesinthesky.data.MovieContract;
+import br.com.sandclan.moviesinthesky.data.MovieColumns;
+import br.com.sandclan.moviesinthesky.data.MovieProvider;
+import br.com.sandclan.moviesinthesky.data.ReviewsColumns;
+import br.com.sandclan.moviesinthesky.data.TrailersColumns;
 import br.com.sandclan.moviesinthesky.entity.Movie;
-import br.com.sandclan.moviesinthesky.interfaces.AssyncTaskCompletListener;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -48,6 +48,8 @@ public class DetailActivity extends AppCompatActivity {
     TextView userReview;
 
     private String mTrailerUrl;
+    private String FAVOURITE = "1";
+    private String UNFAVOURITE = "0";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,8 +68,8 @@ public class DetailActivity extends AppCompatActivity {
             originalTitle.setText(mMovie.getOriginalTitle());
             rateValue.setText(mMovie.getVoteAverage().toString());
             releaseDate.setText(mMovie.getReleaseDate());
-            new FetchMovieTrailerTask(this, new FetchTrailersTaskCompleteListener()).execute(mMovie.getIdAPI());
-            new FetchMovieReviewsTask(this, new FetchReviewTaskCompleteListener()).execute(mMovie.getIdAPI());
+            fillTrailersInfo(mMovie.getIdAPI());
+            fillReviewInfo(mMovie.getIdAPI());
         }
 
         if (mMovie.isFavourite()) {
@@ -78,50 +80,44 @@ public class DetailActivity extends AppCompatActivity {
 
     }
 
-    private class FetchTrailersTaskCompleteListener implements AssyncTaskCompletListener<List<String>> {
+    private void fillTrailersInfo(int movieID) {
+        String whereString = TrailersColumns.MOVIE_ID + " = ?";
+        String[] values = {String.valueOf(movieID)};
+        Cursor trailers = getContentResolver().query(MovieProvider.Trailers.CONTENT_URI, null, whereString, values, null);
 
-        @Override
-        public void onTaskComplete(List<String> result) {
-            mTrailers = result;
-            if (mTrailers.size() > 0) {
-                mTrailerUrl = mTrailers.get(0);
-            } else {
-                trailerIcon.setClickable(false);
-            }
-            Picasso.with(DetailActivity.this).load(String.format(Constants.BASIC_YOUTUBE_THUMB_URL, mTrailerUrl)).error(R.drawable.image_not_found).placeholder(R.drawable.image_not_found).into(trailerIcon);
-
+        if (trailers != null && trailers.moveToFirst()) {
+            mTrailerUrl = trailers.getString(trailers.getColumnIndex(TrailersColumns.KEY));
+        } else {
+            trailerIcon.setClickable(false);
         }
+        Picasso.with(DetailActivity.this).load(String.format(Constants.BASIC_YOUTUBE_THUMB_URL, mTrailerUrl)).error(R.drawable.image_not_found).placeholder(R.drawable.image_not_found).into(trailerIcon);
+        trailers.close();
     }
 
-    private class FetchReviewTaskCompleteListener implements AssyncTaskCompletListener<List<String>> {
+    private void fillReviewInfo(int movieID) {
+        String whereString = ReviewsColumns.MOVIE_ID + " = ?";
+        String[] values = {String.valueOf(movieID)};
+        Cursor reviews = getContentResolver().query(MovieProvider.Reviews.CONTENT_URI, null, whereString, values, null);
 
-        @Override
-        public void onTaskComplete(List<String> result) {
-            mReviews = result;
-            for (String review : result) {
-                userReview.setText(userReview.getText() + review);
-            }
+        if (reviews != null && reviews.moveToFirst()) {
+            userReview.setText(reviews.getString(reviews.getColumnIndex(ReviewsColumns.CONTENT)));
         }
+        reviews.close();
     }
+
 
     public void callYoutube(View view) {
         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.BASIC_YOUTUBE_URL + mTrailerUrl)));
     }
 
     public void favourite(View view) {
-        ContentValues contentValues = new ContentValues();
-        int result;
-        contentValues.put(MovieContract.MovieEntry.COLUMN_FAVOURITE, mMovie.isFavourite() ? 0 : 1);
-        String selectionClause = MovieContract.MovieEntry.COLUMN_ID_FROM_MOVIEDBAPI + "= ?";
-        String[] selectionArgs = {String.valueOf(mMovie.getIdAPI())};
-        result = getContentResolver().update(MovieContract.BASE_CONTENT_URI, contentValues, selectionClause, selectionArgs);
+        ContentValues values = new ContentValues();
+        mMovie.setFavourite(!mMovie.isFavourite());
+        favouriteIcon.setBackgroundResource(mMovie.isFavourite() ? R.drawable.favourite : R.drawable.normal);
+        values.put(MovieColumns.FAVOURITE, mMovie.isFavourite() ? FAVOURITE : UNFAVOURITE);
+        String whereString = MovieColumns.ID_FROM_API + " =  " + mMovie.getIdAPI();
+        getContentResolver().update(MovieProvider.Movies.CONTENT_URI, values, whereString, null);
 
-        if (result > 0) {
-            mMovie.setFavourite(!mMovie.isFavourite());
-            favouriteIcon.setBackgroundResource(mMovie.isFavourite() ? R.drawable.favourite : R.drawable.normal);
-        } else {
-            Toast.makeText(DetailActivity.this, "Error updating database!", Toast.LENGTH_LONG).show();
-        }
     }
 
 

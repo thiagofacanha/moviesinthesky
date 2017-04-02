@@ -20,7 +20,7 @@
 
     <!-- SyncAdapter related -->
     <string name="sync_account_type">moviesinthesky.sandclan.com</string>
-    <string name="content_authority">br.com.sandclan.moviesinthesky</string>
+    <string name="content_authority">br.com.sandclan.moviesinthesky.data.MovieProvider</string>
     <string name="user_reviews">User Reviews</string>
 
 </resources>
