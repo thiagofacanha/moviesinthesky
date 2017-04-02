@@ -77,7 +77,7 @@ public final class MovieProvider {
         @ContentUri(
                 path = Path.TRAILERS,
                 type = "vnd.android.cursor.dir/trailer",
-                defaultSort = TrailersColumns.MOVIE_ID + " ASC")
+                defaultSort = TrailersColumns._ID + " ASC")
         public static final Uri CONTENT_URI = buildUri(Path.TRAILERS);
 
         @InexactContentUri(
@@ -89,6 +89,27 @@ public final class MovieProvider {
 
         public static Uri withMovieId(long id) {
             return buildUri(Path.TRAILERS, String.valueOf(id));
+        }
+    }
+
+
+    @TableEndpoint(table = MovieDatabase.REVIEWS)
+    public static class Reviews {
+        @ContentUri(
+                path = Path.REVIEWS,
+                type = "vnd.android.cursor.dir/review",
+                defaultSort = ReviewsColumns.MOVIE_ID + " ASC")
+        public static final Uri CONTENT_URI = buildUri(Path.REVIEWS);
+
+        @InexactContentUri(
+                name = "REVIEW_ID",
+                path = Path.REVIEWS + "/#",
+                type = "vnd.android.cursor.item/review",
+                whereColumn = ReviewsColumns._ID,
+                pathSegment = 1)
+
+        public static Uri withMovieId(long id) {
+            return buildUri(Path.REVIEWS, String.valueOf(id));
         }
     }
 

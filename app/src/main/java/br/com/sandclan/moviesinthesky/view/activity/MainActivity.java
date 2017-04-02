@@ -2,9 +2,11 @@ package br.com.sandclan.moviesinthesky.view.activity;
 
 import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -58,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements android.app.Loade
     @Override
     protected void onResume() {
         super.onResume();
+        getLoaderManager().restartLoader(0,null,this);
         updateMovies();
     }
 
@@ -93,7 +96,17 @@ public class MainActivity extends AppCompatActivity implements android.app.Loade
 
     @Override
     public android.content.Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        String sortOrder = MovieColumns.TITLE + " ASC";
+        String sortOrder;
+
+        SharedPreferences sharedPrefs =
+                PreferenceManager.getDefaultSharedPreferences(this);
+        String prefSort = sharedPrefs.getString(getString(R.string.pref_order_by_key),
+                getString(R.string.popularity_value));
+        if (prefSort.equals(getString(R.string.popularity_value))) {
+            sortOrder = MovieColumns.POPULARITY + " DESC";
+        } else {
+            sortOrder = MovieColumns.VOTE_AVERAGE + " DESC";
+        }
 
         Uri allMoviesUri = MovieProvider.Movies.CONTENT_URI;
 

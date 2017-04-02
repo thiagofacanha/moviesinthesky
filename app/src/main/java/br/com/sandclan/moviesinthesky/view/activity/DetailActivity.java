@@ -17,12 +17,11 @@ import java.util.List;
 
 import br.com.sandclan.moviesinthesky.R;
 import br.com.sandclan.moviesinthesky.Util.Constants;
-import br.com.sandclan.moviesinthesky.assync.FetchMovieReviewsTask;
 import br.com.sandclan.moviesinthesky.data.MovieColumns;
 import br.com.sandclan.moviesinthesky.data.MovieProvider;
+import br.com.sandclan.moviesinthesky.data.ReviewsColumns;
 import br.com.sandclan.moviesinthesky.data.TrailersColumns;
 import br.com.sandclan.moviesinthesky.entity.Movie;
-import br.com.sandclan.moviesinthesky.interfaces.AssyncTaskCompletListener;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -70,7 +69,7 @@ public class DetailActivity extends AppCompatActivity {
             rateValue.setText(mMovie.getVoteAverage().toString());
             releaseDate.setText(mMovie.getReleaseDate());
             fillTrailersInfo(mMovie.getIdAPI());
-            new FetchMovieReviewsTask(this, new FetchReviewTaskCompleteListener()).execute(mMovie.getIdAPI());
+            fillReviewInfo(mMovie.getIdAPI());
         }
 
         if (mMovie.isFavourite()) {
@@ -84,9 +83,9 @@ public class DetailActivity extends AppCompatActivity {
     private void fillTrailersInfo(int movieID) {
         String whereString = TrailersColumns.MOVIE_ID + " = ?";
         String[] values = {String.valueOf(movieID)};
-        Cursor trailers = getContentResolver().query(MovieProvider.Trailers.CONTENT_URI,null,whereString,values,null);
+        Cursor trailers = getContentResolver().query(MovieProvider.Trailers.CONTENT_URI, null, whereString, values, null);
 
-        if(trailers !=null && trailers.moveToFirst()){
+        if (trailers != null && trailers.moveToFirst()) {
             mTrailerUrl = trailers.getString(trailers.getColumnIndex(TrailersColumns.KEY));
         } else {
             trailerIcon.setClickable(false);
@@ -95,16 +94,17 @@ public class DetailActivity extends AppCompatActivity {
         trailers.close();
     }
 
-    private class FetchReviewTaskCompleteListener implements AssyncTaskCompletListener<List<String>> {
+    private void fillReviewInfo(int movieID) {
+        String whereString = ReviewsColumns.MOVIE_ID + " = ?";
+        String[] values = {String.valueOf(movieID)};
+        Cursor reviews = getContentResolver().query(MovieProvider.Reviews.CONTENT_URI, null, whereString, values, null);
 
-        @Override
-        public void onTaskComplete(List<String> result) {
-            mReviews = result;
-            for (String review : result) {
-                userReview.setText(userReview.getText() + review);
-            }
+        if (reviews != null && reviews.moveToFirst()) {
+            userReview.setText(reviews.getString(reviews.getColumnIndex(ReviewsColumns.CONTENT)));
         }
+        reviews.close();
     }
+
 
     public void callYoutube(View view) {
         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.BASIC_YOUTUBE_URL + mTrailerUrl)));

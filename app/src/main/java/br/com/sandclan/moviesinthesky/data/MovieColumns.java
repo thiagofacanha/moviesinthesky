@@ -17,7 +17,7 @@ public interface MovieColumns {
     @AutoIncrement
     String _ID = "_id";
 
-    @DataType(INTEGER)
+    @DataType(TEXT)
     @NotNull
     String ID_FROM_API = "id_from_api";
 
@@ -41,6 +41,10 @@ public interface MovieColumns {
     @NotNull
     String VOTE_AVERAGE = "vote_average";
 
+    @DataType(INTEGER)
+    @NotNull
+    String POPULARITY = "popularity";
+
     @DataType(TEXT)
     @NotNull
     String RELEASE_DATE = "release_date";
@@ -48,4 +52,7 @@ public interface MovieColumns {
     @DataType(INTEGER)
     @NotNull
     String FAVOURITE = "favourite";
+
+
+
 }

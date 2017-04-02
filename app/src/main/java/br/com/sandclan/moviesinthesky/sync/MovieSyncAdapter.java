@@ -28,8 +28,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Vector;
 
 import br.com.sandclan.moviesinthesky.BuildConfig;
@@ -37,6 +35,7 @@ import br.com.sandclan.moviesinthesky.R;
 import br.com.sandclan.moviesinthesky.Util.Constants;
 import br.com.sandclan.moviesinthesky.data.MovieColumns;
 import br.com.sandclan.moviesinthesky.data.MovieProvider;
+import br.com.sandclan.moviesinthesky.data.ReviewsColumns;
 import br.com.sandclan.moviesinthesky.data.TrailersColumns;
 
 import static br.com.sandclan.moviesinthesky.data.MovieColumns.FAVOURITE;
@@ -140,11 +139,6 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
             JSONArray moviesArray = resultJsonObject.getJSONArray(Constants.RESULTS);
 
             Vector<ContentValues> cVVector = new Vector<>(moviesArray.length());
-            if (moviesArray.length() > 0) {
-                // deleting movies not favourites
-                String whereString = MovieColumns.FAVOURITE + " = 0";
-                getContext().getContentResolver().delete(MovieProvider.Movies.CONTENT_URI, whereString, null);
-            }
             for (int i = 0; i < moviesArray.length(); i++) {
                 // These are the values that will be collected.
                 JSONObject movieJSonObject = moviesArray.getJSONObject(i);
@@ -165,13 +159,15 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
                     movieValues.put(MovieColumns.IMAGE_URL, Constants.HTTP_IMAGE_TMDB_ORG_T_P_W500 + movieJSonObject.getString(Constants.JSON_POSTER_PATH));
                     movieValues.put(MovieColumns.SYNOPSIS, movieJSonObject.getString(Constants.JSON_OVERVIEW));
                     movieValues.put(MovieColumns.VOTE_AVERAGE, movieJSonObject.getDouble(Constants.JSON_VOTE_AVERAGE));
+                    movieValues.put(MovieColumns.POPULARITY, movieJSonObject.getDouble(Constants.JSON_POPULARITY));
                     movieValues.put(MovieColumns.RELEASE_DATE, movieJSonObject.getString(Constants.JSON_RELEASE_DATE));
                     movieValues.put(FAVOURITE, 0);
 
                     cVVector.add(movieValues);
-                    requestReviewFromMovie(movieJSonObject.getInt(Constants.JSON_ID));
-                    requestTraillersFromMovie(movieJSonObject.getInt(Constants.JSON_ID));
+                    requestReviewFromMovie(movieJSonObject.getString(Constants.JSON_ID));
+                    requestTraillersFromMovie(movieJSonObject.getString(Constants.JSON_ID));
                 }
+
                 existFavouriteItem.close();
             }
 
@@ -188,21 +184,12 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
         }
     }
 
-    private void requestReviewFromMovie(int movieId) {
-        if (movieId == 0) {
-            return;
-        }
+    private void requestReviewFromMovie(String movieId) {
         HttpURLConnection urlConnection;
         BufferedReader reader;
         // Will contain the raw JSON response as a string.
         String movieJsonStr;
-
         try {
-
-            SharedPreferences sharedPrefs =
-                    PreferenceManager.getDefaultSharedPreferences(getContext());
-
-
             final String MOVIE_BASE_URL =
                     "https://api.themoviedb.org/3/movie/" + movieId + "/reviews";
             final String API_KEY = "api_key";
@@ -213,7 +200,6 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
 
             URL url = new URL(builtUri.toString());
 
-            // Create the request to OpenWeatherMap, and open the connection
             urlConnection = (HttpURLConnection) url.openConnection();
             urlConnection.setRequestMethod("GET");
             urlConnection.connect();
@@ -243,53 +229,68 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
             movieJsonStr = buffer.toString();
             Log.d("MovieInTheSky", movieJsonStr);
 
-            saveMovieReviewFromJsonInDB(movieJsonStr);
+            saveMovieReviewFromJsonInDB(movieId,movieJsonStr);
 
         } catch (Exception e) {
             Log.d("MovieInTheSky", e.getMessage());
         }
     }
 
-    private static void saveMovieReviewFromJsonInDB(String movieJsonStr) {
-//        List<String> reviews = new ArrayList<>();
-//        JSONObject resultJsonObject = new JSONObject(movieJsonStr);
-//        JSONArray videoObjects = resultJsonObject.getJSONArray(Constants.RESULTS);
-//
-//
-//        for (int i = 0; i < videoObjects.length(); i++) {
-//            JSONObject movieJSonObject = videoObjects.getJSONObject(i);
-//            reviews.add(movieJSonObject.getString(Constants.JSON_REVIEW_AUTHOR) + " : " + movieJSonObject.getString(Constants.JSON_REVIEW_CONTENT));
-//        }
+    private void saveMovieReviewFromJsonInDB(String movieId,String movieJsonStr) {
 
+        JSONObject resultJsonObject;
+        JSONArray videoObjects;
+        try {
+            resultJsonObject = new JSONObject(movieJsonStr);
+            videoObjects = resultJsonObject.getJSONArray(Constants.RESULTS);
+            Vector<ContentValues> cVVector = new Vector<>(videoObjects.length());
+            for (int i = 0; i < videoObjects.length(); i++) {
+                JSONObject movieJSonObject = videoObjects.getJSONObject(i);
+                ContentValues reviewsValues = new ContentValues();
+
+                reviewsValues.put(ReviewsColumns.MOVIE_ID, movieId);
+                reviewsValues.put(ReviewsColumns.ID_FROM_API, movieJSonObject.getString(Constants.JSON_REVIEW_ID));
+                reviewsValues.put(ReviewsColumns.AUTHOR, movieJSonObject.getString(Constants.JSON_REVIEW_AUTHOR));
+                reviewsValues.put(ReviewsColumns.CONTENT, movieJSonObject.getString(Constants.JSON_REVIEW_CONTENT));
+
+                String whereString = ReviewsColumns.ID_FROM_API + " =  ? ";
+                String[] values = {movieJSonObject.getString(Constants.JSON_REVIEW_ID)};
+
+
+                Cursor existReviews = getContext().getContentResolver().query(MovieProvider.Reviews.CONTENT_URI, null, whereString, values, null);
+
+                if (existReviews != null && existReviews.getCount() == 0) {
+                    cVVector.add(reviewsValues);
+                    existReviews.close();
+                }
+                if (cVVector.size() > 0) {
+                    ContentValues[] cvArray = new ContentValues[cVVector.size()];
+                    cVVector.toArray(cvArray);
+                    //Inserting new Reviews
+                    getContext().getContentResolver().bulkInsert(MovieProvider.Reviews.CONTENT_URI, cvArray);
+                }
+            }
+        } catch (JSONException e) {
+            Log.e("MovieInTheSky", e.getMessage());
+        }
     }
 
 
-    private void requestTraillersFromMovie(int movieId) {
-        if (movieId == 0) {
-            return;
-        }
+    private void requestTraillersFromMovie(String movieId) {
         HttpURLConnection urlConnection;
         BufferedReader reader;
-        List<String> trailers = new ArrayList<>();
 
         // Will contain the raw JSON response as a string.
         String movieJsonStr;
 
         try {
 
-            SharedPreferences sharedPrefs =
-                    PreferenceManager.getDefaultSharedPreferences(getContext());
-            String sortOrder = sharedPrefs.getString(getContext().getString(R.string.pref_order_by_key),
-                    getContext().getString(R.string.popularity_value));
-
             final String MOVIE_BASE_URL =
                     "https://api.themoviedb.org/3/movie/" + movieId + "/videos";
-            final String LANGUAGE = "language";
             final String API_KEY = "api_key";
 
             Uri builtUri = Uri.parse(MOVIE_BASE_URL).buildUpon()
                     .appendQueryParameter(API_KEY, BuildConfig.API_KEY)
-                    //    .appendQueryParameter(LANGUAGE, "pt-BR")
                     .build();
 
             URL url = new URL(builtUri.toString());
@@ -332,7 +333,7 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
         }
     }
 
-    private void saveMovieTraillersFromJsonInDB(int movieId, String JsonStr) {
+    private void saveMovieTraillersFromJsonInDB(String movieId, String JsonStr) {
         JSONObject resultJsonObject;
         JSONArray videoObjects;
         try {

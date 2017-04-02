@@ -13,4 +13,7 @@ public final class MovieDatabase {
 
     @Table(TrailersColumns.class)
     public static final String TRAILERS = "trailers";
+
+    @Table(ReviewsColumns.class)
+    public static final String REVIEWS = "reviews";
 }

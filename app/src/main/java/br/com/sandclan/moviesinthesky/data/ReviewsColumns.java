@@ -9,7 +9,7 @@ import net.simonvt.schematic.annotation.PrimaryKey;
 import static net.simonvt.schematic.annotation.DataType.Type.INTEGER;
 import static net.simonvt.schematic.annotation.DataType.Type.TEXT;
 
-public interface TrailersColumns {
+public interface ReviewsColumns {
 
     @DataType(INTEGER)
     @PrimaryKey
@@ -26,27 +26,9 @@ public interface TrailersColumns {
 
     @DataType(TEXT)
     @NotNull
-    String NAME = "name";
+    String AUTHOR = "author";
 
     @DataType(TEXT)
     @NotNull
-    String SITE = "site";
-
-    @DataType(INTEGER)
-    @NotNull
-    String SIZE = "size";
-
-    @DataType(TEXT)
-    @NotNull
-    String LANGUAGE = "language";
-
-    @DataType(TEXT)
-    @NotNull
-    String KEY = "key";
-
-    @DataType(TEXT)
-    @NotNull
-    String TYPE = "type";
-
-
+    String CONTENT = "content";
 }
