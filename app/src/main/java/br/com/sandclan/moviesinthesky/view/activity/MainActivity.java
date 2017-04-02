@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements android.app.Loade
     @Override
     protected void onResume() {
         super.onResume();
-        getLoaderManager().restartLoader(0,null,this);
+        getLoaderManager().restartLoader(0, null, this);
         updateMovies();
     }
 
@@ -104,7 +104,9 @@ public class MainActivity extends AppCompatActivity implements android.app.Loade
                 getString(R.string.popularity_value));
         if (prefSort.equals(getString(R.string.popularity_value))) {
             sortOrder = MovieColumns.POPULARITY + " DESC";
-        } else {
+        } else if (prefSort.equals(getString(R.string.favourite_value))) {
+            sortOrder = MovieColumns.FAVOURITE + " DESC, " + MovieColumns.TITLE + " ASC" ;
+        }else{
             sortOrder = MovieColumns.VOTE_AVERAGE + " DESC";
         }
 

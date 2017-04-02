@@ -4,12 +4,14 @@
     <string-array name="movie_order_label_options">
         <item>@string/popularity_label</item>
         <item>@string/rate_label</item>
+        <item>@string/favourite_label</item>
     </string-array>
 
 
     <string-array name="movie_order_values_options">
         <item>@string/popularity_value</item>
         <item>@string/rate_value</item>
+        <item>@string/favourite_value</item>
     </string-array>
 
 
