@@ -67,6 +67,9 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
                     PreferenceManager.getDefaultSharedPreferences(getContext());
             String sortOrder = sharedPrefs.getString(getContext().getString(R.string.pref_order_by_key),
                     getContext().getString(R.string.popularity_value));
+            if (sortOrder.equals(getContext().getString(R.string.favourite_value))) {
+                sortOrder = getContext().getString(R.string.popularity_value);
+            }
 
             final String MOVIE_BASE_URL =
                     "https://api.themoviedb.org/3/movie/" + sortOrder + "?include_adult=false&page=1";
@@ -229,14 +232,14 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
             movieJsonStr = buffer.toString();
             Log.d("MovieInTheSky", movieJsonStr);
 
-            saveMovieReviewFromJsonInDB(movieId,movieJsonStr);
+            saveMovieReviewFromJsonInDB(movieId, movieJsonStr);
 
         } catch (Exception e) {
             Log.d("MovieInTheSky", e.getMessage());
         }
     }
 
-    private void saveMovieReviewFromJsonInDB(String movieId,String movieJsonStr) {
+    private void saveMovieReviewFromJsonInDB(String movieId, String movieJsonStr) {
 
         JSONObject resultJsonObject;
         JSONArray videoObjects;
@@ -370,7 +373,7 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
                     //Inserting new trailers
                     getContext().getContentResolver().bulkInsert(MovieProvider.Trailers.CONTENT_URI, cvArray);
                 }
-             }
+            }
 
 
         } catch (JSONException e) {
