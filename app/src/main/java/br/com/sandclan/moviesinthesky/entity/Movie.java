@@ -10,10 +10,9 @@ public class Movie implements Serializable {
     private String imageUrl;
     private String synopsis;
     private Double voteAverage;
+    private int popularity;
     private String releaseDate;
     private boolean isFavourite;
-    private String userReviews;
-    private String trailerCode;
 
     public int getIdAPI() {
         return idAPI;
@@ -41,7 +40,7 @@ public class Movie implements Serializable {
     }
 
     public String getImageUrl() {
-        return  imageUrl;
+        return imageUrl;
     }
 
     public void setImageUrl(String imageUrl) {
@@ -88,20 +87,12 @@ public class Movie implements Serializable {
         isFavourite = favourite;
     }
 
-    public String getUserReviews() {
-        return userReviews;
+    public int getPopularity() {
+        return popularity;
     }
 
-    public void setUserReviews(String userReviews) {
-        this.userReviews = userReviews;
-    }
-
-    public String getTrailerCode() {
-        return trailerCode;
-    }
-
-    public void setTrailerCode(String trailerCode) {
-        this.trailerCode = trailerCode;
+    public void setPopularity(int popularity) {
+        this.popularity = popularity;
     }
 }
 

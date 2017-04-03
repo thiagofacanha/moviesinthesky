@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 
 import br.com.sandclan.moviesinthesky.R;
+import br.com.sandclan.moviesinthesky.data.MovieContract;
 import br.com.sandclan.moviesinthesky.entity.Movie;
 
 public class MovieAdapter extends CursorAdapter {
@@ -38,8 +39,8 @@ public class MovieAdapter extends CursorAdapter {
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         ViewHolder holder = (ViewHolder) view.getTag();
-        holder.title.setText(cursor.getString(cursor.getColumnIndex(MovieColumns.TITLE)));
-        Picasso.with(context).load(cursor.getString(cursor.getColumnIndex(MovieColumns.IMAGE_URL))).error(R.drawable.image_not_found).placeholder(R.drawable.image_not_found).into(holder.poster);
+        holder.title.setText(cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_TITLE)));
+        Picasso.with(context).load(cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_IMAGE_URL))).error(R.drawable.image_not_found).placeholder(R.drawable.image_not_found).into(holder.poster);
 
 
     }
@@ -49,29 +50,26 @@ public class MovieAdapter extends CursorAdapter {
         Movie movie = new Movie();
         Cursor cursor = getCursor();
         if (cursor.moveToPosition(position)) {
-            movie.setIdAPI(cursor.getInt(cursor.getColumnIndex(MovieColumns.ID_FROM_API)));
-            movie.setTitle(cursor.getString(cursor.getColumnIndex(MovieColumns.TITLE)));
-            movie.setOriginalTitle(cursor.getString(cursor.getColumnIndex(MovieColumns.ORIGINAL_TITLE)));
-            movie.setImageUrl(cursor.getString(cursor.getColumnIndex(MovieColumns.IMAGE_URL)));
-            movie.setSynopsis(cursor.getString(cursor.getColumnIndex(MovieColumns.SYNOPSIS)));
-            movie.setReleaseDate(cursor.getString(cursor.getColumnIndex(MovieColumns.RELEASE_DATE)));
-            movie.setVoteAverage(cursor.getDouble(cursor.getColumnIndex(MovieColumns.VOTE_AVERAGE)));
-            movie.setFavourite(1 == cursor.getInt(cursor.getColumnIndex(MovieColumns.FAVOURITE)));
+            movie.setIdAPI(cursor.getInt(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_ID_FROM_MOVIEDBAPI)));
+            movie.setTitle(cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_TITLE)));
+            movie.setOriginalTitle(cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_ORIGINAL_TITLE)));
+            movie.setImageUrl(cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_IMAGE_URL)));
+            movie.setSynopsis(cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_SYNOPSIS)));
+            movie.setReleaseDate(cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_RELEASE_DATE)));
+            movie.setVoteAverage(cursor.getDouble(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE)));
+            movie.setPopularity(cursor.getInt(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_POPULARITY)));
+            movie.setFavourite(1 == cursor.getInt(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_FAVOURITE)));
 
         }
         return movie;
     }
-
     public class ViewHolder {
-
         private final TextView title;
         private final ImageView poster;
 
         public ViewHolder(View view) {
-
             title = (TextView) view.findViewById(R.id.textview_title);
             poster = (ImageView) view.findViewById(R.id.imageview_poster);
-
         }
     }
 }
