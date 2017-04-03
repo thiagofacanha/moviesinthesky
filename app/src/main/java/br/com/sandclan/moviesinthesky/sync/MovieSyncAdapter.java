@@ -163,11 +163,12 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
                     movieValues.put(MovieContract.MovieEntry.COLUMN_FAVOURITE, 0);
 
                     cVVector.add(movieValues);
-                    requestReviewFromMovie(movieJSonObject.getString(Constants.JSON_ID));
-                    requestTraillersFromMovie(movieJSonObject.getString(Constants.JSON_ID));
                 }
 
                 existFavouriteItem.close();
+
+                requestTraillersFromMovie(movieJSonObject.getString(Constants.JSON_ID));
+                requestReviewFromMovie(movieJSonObject.getString(Constants.JSON_ID));
             }
 
             // add to database
@@ -262,13 +263,14 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
                     cVVector.add(reviewsValues);
                     existReviews.close();
                 }
-                if (cVVector.size() > 0) {
-                    ContentValues[] cvArray = new ContentValues[cVVector.size()];
-                    cVVector.toArray(cvArray);
-                    //Inserting new Reviews
-                    getContext().getContentResolver().bulkInsert(MovieContract.ReviewEntry.CONTENT_URI, cvArray);
-                }
             }
+            if (cVVector.size() > 0) {
+                ContentValues[] cvArray = new ContentValues[cVVector.size()];
+                cVVector.toArray(cvArray);
+                //Inserting new Reviews
+                getContext().getContentResolver().bulkInsert(MovieContract.ReviewEntry.CONTENT_URI, cvArray);
+            }
+
         } catch (JSONException e) {
             Log.e("MovieInTheSky", e.getMessage());
         }
@@ -349,8 +351,8 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
                 trailersValues.put(MovieContract.TrailerEntry.COLUMN_NAME, movieJSonObject.getString(Constants.JSON_TRAILER_NAME));
                 trailersValues.put(MovieContract.TrailerEntry.COLUMN_LANGUAGE, movieJSonObject.getString(Constants.JSON_TRAILER_LANGUAGE));
                 trailersValues.put(MovieContract.TrailerEntry.COLUMN_SITE, movieJSonObject.getString(Constants.JSON_TRAILER_SITE));
-                trailersValues.put(MovieContract.TrailerEntry.COLUMN_SIZE, movieJSonObject.getString(Constants.JSON_TRAILER_SIZE));
-                trailersValues.put(MovieContract.TrailerEntry.CONTENT_TYPE, movieJSonObject.getString(Constants.JSON_TRAILER_TYPE));
+                trailersValues.put(MovieContract.TrailerEntry.COLUMN_SIZE, movieJSonObject.getInt(Constants.JSON_TRAILER_SIZE));
+                trailersValues.put(MovieContract.TrailerEntry.COLUMN_TYPE, movieJSonObject.getString(Constants.JSON_TRAILER_TYPE));
 
 
                 String whereString = MovieContract.TrailerEntry.COLUMN_ID_FROM_MOVIEDBAPI + " =  ? ";
@@ -363,12 +365,13 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
                     cVVector.add(trailersValues);
                     existTrailers.close();
                 }
-                if (cVVector.size() > 0) {
-                    ContentValues[] cvArray = new ContentValues[cVVector.size()];
-                    cVVector.toArray(cvArray);
-                    //Inserting new trailers
-                    getContext().getContentResolver().bulkInsert(MovieContract.TrailerEntry.CONTENT_URI, cvArray);
-                }
+            }
+
+            if (cVVector.size() > 0) {
+                ContentValues[] cvArray = new ContentValues[cVVector.size()];
+                cVVector.toArray(cvArray);
+                //Inserting new trailers
+                getContext().getContentResolver().bulkInsert(MovieContract.TrailerEntry.CONTENT_URI, cvArray);
             }
 
 

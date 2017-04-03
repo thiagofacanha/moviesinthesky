@@ -42,9 +42,9 @@ public class MovieInTheSkyDBHelper extends SQLiteOpenHelper {
                 TrailerEntry.COLUMN_NAME + " TEXT, " +
                 TrailerEntry.COLUMN_SITE + " TEXT, " +
                 TrailerEntry.COLUMN_SIZE + " INTEGER, " +
-                TrailerEntry.COLUMN_LANGUAGE + " REAL, " +
-                TrailerEntry.COLUMN_KEY + " INTEGER, " +
-                TrailerEntry.COLUMN_TYPE + " INTEGER " +
+                TrailerEntry.COLUMN_LANGUAGE + " TEXT, " +
+                TrailerEntry.COLUMN_KEY + " TEXT, " +
+                TrailerEntry.COLUMN_TYPE + " TEXT " +
                 " );";
 
 

@@ -71,6 +71,30 @@ public class MovieProvider extends ContentProvider {
                 );
                 break;
             }
+            case TRAILER: {
+                cursor = mOpenHelper.getReadableDatabase().query(
+                        MovieContract.TrailerEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder
+                );
+                break;
+            }
+            case REVIEW: {
+                cursor = mOpenHelper.getReadableDatabase().query(
+                        MovieContract.ReviewEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder
+                );
+                break;
+            }
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -86,6 +110,10 @@ public class MovieProvider extends ContentProvider {
         switch (match) {
             case MOVIE:
                 return MovieContract.MovieEntry.CONTENT_TYPE;
+            case TRAILER:
+                return MovieContract.TrailerEntry.CONTENT_TYPE;
+            case REVIEW:
+                return MovieContract.ReviewEntry.CONTENT_TYPE;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -107,6 +135,24 @@ public class MovieProvider extends ContentProvider {
                     throw new android.database.SQLException("Failed to insert row into " + uri);
                 break;
             }
+            case TRAILER: {
+                long _id = db.insert(MovieContract.TrailerEntry.TABLE_NAME, null, values);
+                if (_id > 0)
+                    returnUri = MovieContract.TrailerEntry.buildTrailerByID(_id);
+                else
+                    throw new android.database.SQLException("Failed to insert row into " + uri);
+                break;
+            }
+
+            case REVIEW: {
+                long _id = db.insert(MovieContract.ReviewEntry.TABLE_NAME, null, values);
+                if (_id > 0)
+                    returnUri = MovieContract.ReviewEntry.buildReviewByID(_id);
+                else
+                    throw new android.database.SQLException("Failed to insert row into " + uri);
+                break;
+            }
+
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -125,6 +171,14 @@ public class MovieProvider extends ContentProvider {
                 rowsDeleted = db.delete(
                         MovieContract.MovieEntry.TABLE_NAME, selection, selectionArgs);
                 break;
+            case TRAILER:
+                rowsDeleted = db.delete(
+                        MovieContract.TrailerEntry.TABLE_NAME, selection, selectionArgs);
+                break;
+            case REVIEW:
+                rowsDeleted = db.delete(
+                        MovieContract.ReviewEntry.TABLE_NAME, selection, selectionArgs);
+                break;
             default:
                 throw new UnsupportedOperationException("Unknown uri: " + uri);
         }
@@ -139,15 +193,22 @@ public class MovieProvider extends ContentProvider {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         final int match = sUriMatcher.match(uri);
         int rowsUpdated;
-        rowsUpdated = db.update(MovieContract.MovieEntry.TABLE_NAME, values, selection, selectionArgs);
-//        switch (match) {
-//            case MOVIE:
-//                rowsUpdated = db.update(MovieContract.MovieEntry.TABLE_NAME, values, selection,
-//                        selectionArgs);
-//                break;
-//            default:
-//                throw new UnsupportedOperationException("Unknown uri: " + uri);
-//        }
+        switch (match) {
+            case MOVIE:
+                rowsUpdated = db.update(MovieContract.MovieEntry.TABLE_NAME, values, selection,
+                        selectionArgs);
+                break;
+            case TRAILER:
+                rowsUpdated = db.update(MovieContract.TrailerEntry.TABLE_NAME, values, selection,
+                        selectionArgs);
+                break;
+            case REVIEW:
+                rowsUpdated = db.update(MovieContract.ReviewEntry.TABLE_NAME, values, selection,
+                        selectionArgs);
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
         if (rowsUpdated != 0) {
             getContext().getContentResolver().notifyChange(uri, null);
         }
@@ -161,6 +222,8 @@ public class MovieProvider extends ContentProvider {
         final String authority = MovieProvider.AUTHORITY;
 
         matcher.addURI(authority, MovieContract.PATH_MOVIE, MOVIE);
+        matcher.addURI(authority, MovieContract.PATH_TRAILER, TRAILER);
+        matcher.addURI(authority, MovieContract.PATH_REVIEW, REVIEW);
 
         return matcher;
     }
@@ -169,10 +232,10 @@ public class MovieProvider extends ContentProvider {
     public int bulkInsert(Uri uri, ContentValues[] values) {
         final SQLiteDatabase db = mOpenHelper.getWritableDatabase();
         final int match = sUriMatcher.match(uri);
+        int returnCount = 0;
         switch (match) {
             case MOVIE:
                 db.beginTransaction();
-                int returnCount = 0;
                 try {
                     for (ContentValues value : values) {
                         long _id = db.insert(MovieContract.MovieEntry.TABLE_NAME, null, value);
@@ -186,6 +249,38 @@ public class MovieProvider extends ContentProvider {
                 }
                 getContext().getContentResolver().notifyChange(uri, null);
                 return returnCount;
+
+            case TRAILER:
+                db.beginTransaction();
+                try {
+                    for (ContentValues value : values) {
+                        long _id = db.insert(MovieContract.TrailerEntry.TABLE_NAME, null, value);
+                        if (_id != -1) {
+                            returnCount++;
+                        }
+                    }
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                }
+                getContext().getContentResolver().notifyChange(uri, null);
+                return returnCount;
+            case REVIEW:
+                db.beginTransaction();
+                try {
+                    for (ContentValues value : values) {
+                        long _id = db.insert(MovieContract.ReviewEntry.TABLE_NAME, null, value);
+                        if (_id != -1) {
+                            returnCount++;
+                        }
+                    }
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                }
+                getContext().getContentResolver().notifyChange(uri, null);
+                return returnCount;
+
             default:
                 return super.bulkInsert(uri, values);
         }

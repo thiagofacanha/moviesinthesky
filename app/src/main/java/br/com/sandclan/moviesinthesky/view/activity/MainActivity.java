@@ -83,8 +83,6 @@ public class MainActivity extends AppCompatActivity implements android.app.Loade
             startActivity(detailIntent);
             return true;
         }
-
-
         return super.onOptionsItemSelected(item);
     }
 

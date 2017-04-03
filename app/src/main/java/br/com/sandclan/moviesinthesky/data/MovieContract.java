@@ -37,7 +37,6 @@ public class MovieContract {
         public static final String COLUMN_RELEASE_DATE = "release_date";
         public static final String COLUMN_FAVOURITE = "favourite";
 
-
         public static Uri buildMovieByID(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
@@ -72,12 +71,12 @@ public class MovieContract {
         public static final String COLUMN_TYPE = "type";
 
 
-        public static Uri buildMovieByID(long id) {
+        public static Uri buildTrailerByID(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
 
 
-        public static String getIdFromMovie(Uri uri) {
+        public static String getIdFromTrailer(Uri uri) {
             return uri.getPathSegments().get(0);
         }
     }
@@ -101,12 +100,12 @@ public class MovieContract {
         public static final String COLUMN_CONTENT = "content";
 
 
-        public static Uri buildMovieByID(long id) {
+        public static Uri buildReviewByID(long id) {
             return ContentUris.withAppendedId(CONTENT_URI, id);
         }
 
 
-        public static String getIdFromMovie(Uri uri) {
+        public static String getIdFromReview(Uri uri) {
             return uri.getPathSegments().get(0);
         }
     }
