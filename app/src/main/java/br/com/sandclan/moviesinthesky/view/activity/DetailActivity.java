@@ -17,10 +17,7 @@ import java.util.List;
 
 import br.com.sandclan.moviesinthesky.R;
 import br.com.sandclan.moviesinthesky.Util.Constants;
-import br.com.sandclan.moviesinthesky.data.MovieColumns;
 import br.com.sandclan.moviesinthesky.data.MovieProvider;
-import br.com.sandclan.moviesinthesky.data.ReviewsColumns;
-import br.com.sandclan.moviesinthesky.data.TrailersColumns;
 import br.com.sandclan.moviesinthesky.entity.Movie;
 import butterknife.BindView;
 import butterknife.ButterKnife;

@@ -33,10 +33,7 @@ import java.util.Vector;
 import br.com.sandclan.moviesinthesky.BuildConfig;
 import br.com.sandclan.moviesinthesky.R;
 import br.com.sandclan.moviesinthesky.Util.Constants;
-import br.com.sandclan.moviesinthesky.data.MovieColumns;
 import br.com.sandclan.moviesinthesky.data.MovieProvider;
-import br.com.sandclan.moviesinthesky.data.ReviewsColumns;
-import br.com.sandclan.moviesinthesky.data.TrailersColumns;
 
 import static br.com.sandclan.moviesinthesky.data.MovieColumns.FAVOURITE;
 

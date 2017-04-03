@@ -13,7 +13,6 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 
 import br.com.sandclan.moviesinthesky.R;
-import br.com.sandclan.moviesinthesky.data.MovieColumns;
 import br.com.sandclan.moviesinthesky.entity.Movie;
 
 public class MovieAdapter extends CursorAdapter {

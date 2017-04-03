@@ -20,7 +20,6 @@ import android.widget.ListView;
 import br.com.sandclan.moviesinthesky.R;
 import br.com.sandclan.moviesinthesky.Util.Constants;
 import br.com.sandclan.moviesinthesky.adapter.MovieAdapter;
-import br.com.sandclan.moviesinthesky.data.MovieColumns;
 import br.com.sandclan.moviesinthesky.data.MovieProvider;
 import br.com.sandclan.moviesinthesky.entity.Movie;
 import br.com.sandclan.moviesinthesky.sync.MovieSyncAdapter;
