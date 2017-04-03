@@ -18,6 +18,7 @@ public class MovieProvider extends ContentProvider {
     static final int MOVIE = 100;
     static final int TRAILER = 101;
     static final int REVIEW = 102;
+    public static final String AUTHORITY = "br.com.sandclan.moviesinthesky.data";
     private static final SQLiteQueryBuilder sMovieQueryBuilder;
 
     static {
@@ -157,7 +158,7 @@ public class MovieProvider extends ContentProvider {
     static UriMatcher buildUriMatcher() {
 
         final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
-        final String authority = MovieContract.CONTENT_AUTHORITY;
+        final String authority = MovieProvider.AUTHORITY;
 
         matcher.addURI(authority, MovieContract.PATH_MOVIE, MOVIE);
 

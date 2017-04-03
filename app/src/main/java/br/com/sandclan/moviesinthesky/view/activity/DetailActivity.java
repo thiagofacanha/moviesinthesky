@@ -17,7 +17,7 @@ import java.util.List;
 
 import br.com.sandclan.moviesinthesky.R;
 import br.com.sandclan.moviesinthesky.Util.Constants;
-import br.com.sandclan.moviesinthesky.data.MovieProvider;
+import br.com.sandclan.moviesinthesky.data.MovieContract;
 import br.com.sandclan.moviesinthesky.entity.Movie;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -78,12 +78,12 @@ public class DetailActivity extends AppCompatActivity {
     }
 
     private void fillTrailersInfo(int movieID) {
-        String whereString = TrailersColumns.MOVIE_ID + " = ?";
+        String whereString = MovieContract.TrailerEntry.COLUMN_MOVIE_ID + " = ?";
         String[] values = {String.valueOf(movieID)};
-        Cursor trailers = getContentResolver().query(MovieProvider.Trailers.CONTENT_URI, null, whereString, values, null);
+        Cursor trailers = getContentResolver().query(MovieContract.TrailerEntry.CONTENT_URI, null, whereString, values, null);
 
         if (trailers != null && trailers.moveToFirst()) {
-            mTrailerUrl = trailers.getString(trailers.getColumnIndex(TrailersColumns.KEY));
+            mTrailerUrl = trailers.getString(trailers.getColumnIndex(MovieContract.TrailerEntry.COLUMN_KEY));
         } else {
             trailerIcon.setClickable(false);
         }
@@ -92,12 +92,12 @@ public class DetailActivity extends AppCompatActivity {
     }
 
     private void fillReviewInfo(int movieID) {
-        String whereString = ReviewsColumns.MOVIE_ID + " = ?";
+        String whereString = MovieContract.ReviewEntry.COLUMN_MOVIE_ID + " = ?";
         String[] values = {String.valueOf(movieID)};
-        Cursor reviews = getContentResolver().query(MovieProvider.Reviews.CONTENT_URI, null, whereString, values, null);
+        Cursor reviews = getContentResolver().query(MovieContract.ReviewEntry.CONTENT_URI, null, whereString, values, null);
 
         if (reviews != null && reviews.moveToFirst()) {
-            userReview.setText(reviews.getString(reviews.getColumnIndex(ReviewsColumns.CONTENT)));
+            userReview.setText(reviews.getString(reviews.getColumnIndex(MovieContract.ReviewEntry.COLUMN_CONTENT)));
         }
         reviews.close();
     }
@@ -111,9 +111,9 @@ public class DetailActivity extends AppCompatActivity {
         ContentValues values = new ContentValues();
         mMovie.setFavourite(!mMovie.isFavourite());
         favouriteIcon.setBackgroundResource(mMovie.isFavourite() ? R.drawable.favourite : R.drawable.normal);
-        values.put(MovieColumns.FAVOURITE, mMovie.isFavourite() ? FAVOURITE : UNFAVOURITE);
-        String whereString = MovieColumns.ID_FROM_API + " =  " + mMovie.getIdAPI();
-        getContentResolver().update(MovieProvider.Movies.CONTENT_URI, values, whereString, null);
+        values.put(MovieContract.MovieEntry.COLUMN_FAVOURITE, mMovie.isFavourite() ? FAVOURITE : UNFAVOURITE);
+        String whereString = MovieContract.MovieEntry.COLUMN_ID_FROM_MOVIEDBAPI + " =  " + mMovie.getIdAPI();
+        getContentResolver().update(MovieContract.MovieEntry.CONTENT_URI, values, whereString, null);
 
     }
 

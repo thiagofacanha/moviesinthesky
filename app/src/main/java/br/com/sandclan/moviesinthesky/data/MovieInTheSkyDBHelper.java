@@ -44,7 +44,7 @@ public class MovieInTheSkyDBHelper extends SQLiteOpenHelper {
                 TrailerEntry.COLUMN_SIZE + " INTEGER, " +
                 TrailerEntry.COLUMN_LANGUAGE + " REAL, " +
                 TrailerEntry.COLUMN_KEY + " INTEGER, " +
-                TrailerEntry.COLUMN_TYPE + " INTEGER, " +
+                TrailerEntry.COLUMN_TYPE + " INTEGER " +
                 " );";
 
 
@@ -53,7 +53,7 @@ public class MovieInTheSkyDBHelper extends SQLiteOpenHelper {
                 ReviewEntry.COLUMN_ID_FROM_MOVIEDBAPI + " TEXT NOT NULL, " +
                 ReviewEntry.COLUMN_MOVIE_ID + " TEXT NOT NULL, " +
                 ReviewEntry.COLUMN_AUTHOR + " TEXT , " +
-                ReviewEntry.COLUMN_CONTENT + " TEXT, " +
+                ReviewEntry.COLUMN_CONTENT + " TEXT " +
                 " );";
 
         db.execSQL(SQL_CREATE_MOVIE_TABLE);

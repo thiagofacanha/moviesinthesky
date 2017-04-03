@@ -8,9 +8,8 @@ import android.provider.BaseColumns;
 
 public class MovieContract {
 
-    public static final String CONTENT_AUTHORITY = "br.com.sandclan.moviesinthesky";
 
-    public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
+    public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + MovieProvider.AUTHORITY);
     public static final String PATH_MOVIE = "movie";
     public static final String PATH_TRAILER = "trailer";
     public static final String PATH_REVIEW = "review";
@@ -22,9 +21,9 @@ public class MovieContract {
                 BASE_CONTENT_URI.buildUpon().appendPath(PATH_MOVIE).build();
 
         public static final String CONTENT_TYPE =
-                ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_MOVIE;
+                ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + MovieProvider.AUTHORITY + "/" + PATH_MOVIE;
         public static final String CONTENT_ITEM_TYPE =
-                ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_MOVIE;
+                ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + MovieProvider.AUTHORITY + "/" + PATH_MOVIE;
 
         public static final String TABLE_NAME = "movie";
 
@@ -57,9 +56,9 @@ public class MovieContract {
                 BASE_CONTENT_URI.buildUpon().appendPath(PATH_TRAILER).build();
 
         public static final String CONTENT_TYPE =
-                ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_TRAILER;
+                ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + MovieProvider.AUTHORITY + "/" + PATH_TRAILER;
         public static final String CONTENT_ITEM_TYPE =
-                ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_TRAILER;
+                ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + MovieProvider.AUTHORITY + "/" + PATH_TRAILER;
 
         public static final String TABLE_NAME = "trailer";
 
@@ -90,11 +89,11 @@ public class MovieContract {
                 BASE_CONTENT_URI.buildUpon().appendPath(PATH_REVIEW).build();
 
         public static final String CONTENT_TYPE =
-                ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_REVIEW;
+                ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + MovieProvider.AUTHORITY + "/" + PATH_REVIEW;
         public static final String CONTENT_ITEM_TYPE =
-                ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_REVIEW;
+                ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + MovieProvider.AUTHORITY + "/" + PATH_REVIEW;
 
-        public static final String TABLE_NAME = "trailer";
+        public static final String TABLE_NAME = "review";
 
         public static final String COLUMN_ID_FROM_MOVIEDBAPI = "idapi";
         public static final String COLUMN_MOVIE_ID = "movie_id";

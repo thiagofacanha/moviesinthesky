@@ -20,7 +20,7 @@ import android.widget.ListView;
 import br.com.sandclan.moviesinthesky.R;
 import br.com.sandclan.moviesinthesky.Util.Constants;
 import br.com.sandclan.moviesinthesky.adapter.MovieAdapter;
-import br.com.sandclan.moviesinthesky.data.MovieProvider;
+import br.com.sandclan.moviesinthesky.data.MovieContract;
 import br.com.sandclan.moviesinthesky.entity.Movie;
 import br.com.sandclan.moviesinthesky.sync.MovieSyncAdapter;
 
@@ -102,14 +102,14 @@ public class MainActivity extends AppCompatActivity implements android.app.Loade
         String prefSort = sharedPrefs.getString(getString(R.string.pref_order_by_key),
                 getString(R.string.popularity_value));
         if (prefSort.equals(getString(R.string.popularity_value))) {
-            sortOrder = MovieColumns.POPULARITY + " DESC";
+            sortOrder = MovieContract.MovieEntry.COLUMN_POPULARITY + " DESC";
         } else if (prefSort.equals(getString(R.string.favourite_value))) {
-            sortOrder = MovieColumns.FAVOURITE + " DESC, " + MovieColumns.TITLE + " ASC" ;
+            sortOrder = MovieContract.MovieEntry.COLUMN_FAVOURITE + " DESC, " + MovieContract.MovieEntry.COLUMN_TITLE + " ASC" ;
         }else{
-            sortOrder = MovieColumns.VOTE_AVERAGE + " DESC";
+            sortOrder = MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE + " DESC";
         }
 
-        Uri allMoviesUri = MovieProvider.Movies.CONTENT_URI;
+        Uri allMoviesUri = MovieContract.MovieEntry.CONTENT_URI;
 
         return new CursorLoader(MainActivity.this,
                 allMoviesUri,
