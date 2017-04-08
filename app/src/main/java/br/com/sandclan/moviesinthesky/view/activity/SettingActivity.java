@@ -7,6 +7,7 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 
 import br.com.sandclan.moviesinthesky.R;
+import br.com.sandclan.moviesinthesky.data.MovieContract;
 
 
 public class SettingActivity extends PreferenceActivity
@@ -44,6 +45,9 @@ public class SettingActivity extends PreferenceActivity
     @Override
     public boolean onPreferenceChange(Preference preference, Object value) {
         String stringValue = value.toString();
+        String whereString = MovieContract.MovieEntry.COLUMN_FAVOURITE + " = 0";
+        getContentResolver().delete(MovieContract.MovieEntry.CONTENT_URI, whereString, null);
+
         if (preference instanceof ListPreference) {
             // For list preferences, look up the correct display value in
             // the preference's 'entries' list (since they have separate labels/values).

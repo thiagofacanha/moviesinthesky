@@ -33,12 +33,8 @@ import java.util.Vector;
 import br.com.sandclan.moviesinthesky.BuildConfig;
 import br.com.sandclan.moviesinthesky.R;
 import br.com.sandclan.moviesinthesky.Util.Constants;
-import br.com.sandclan.moviesinthesky.data.MovieColumns;
+import br.com.sandclan.moviesinthesky.data.MovieContract;
 import br.com.sandclan.moviesinthesky.data.MovieProvider;
-import br.com.sandclan.moviesinthesky.data.ReviewsColumns;
-import br.com.sandclan.moviesinthesky.data.TrailersColumns;
-
-import static br.com.sandclan.moviesinthesky.data.MovieColumns.FAVOURITE;
 
 public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
 
@@ -68,7 +64,7 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
             String sortOrder = sharedPrefs.getString(getContext().getString(R.string.pref_order_by_key),
                     getContext().getString(R.string.popularity_value));
             if (sortOrder.equals(getContext().getString(R.string.favourite_value))) {
-                sortOrder = getContext().getString(R.string.popularity_value);
+               return;
             }
 
             final String MOVIE_BASE_URL =
@@ -146,32 +142,33 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
                 // These are the values that will be collected.
                 JSONObject movieJSonObject = moviesArray.getJSONObject(i);
 
-                String whereString = MovieColumns.ID_FROM_API + " =  ?  ";
+                String whereString = MovieContract.MovieEntry.COLUMN_ID_FROM_MOVIEDBAPI + " =  ?  ";
                 String[] values = {movieJSonObject.getString(Constants.JSON_ID)};
 
 
-                Cursor existFavouriteItem = getContext().getContentResolver().query(MovieProvider.Movies.CONTENT_URI, null, whereString, values, null);
+                Cursor existFavouriteItem = getContext().getContentResolver().query(MovieContract.MovieEntry.CONTENT_URI, null, whereString, values, null);
 
                 if (existFavouriteItem != null && existFavouriteItem.getCount() == 0) {
 
                     ContentValues movieValues = new ContentValues();
 
-                    movieValues.put(MovieColumns.ID_FROM_API, movieJSonObject.getString(Constants.JSON_ID));
-                    movieValues.put(MovieColumns.TITLE, movieJSonObject.getString(Constants.JSON_TITLE));
-                    movieValues.put(MovieColumns.ORIGINAL_TITLE, movieJSonObject.getString(Constants.JSON_ORIGINAL_TITLE));
-                    movieValues.put(MovieColumns.IMAGE_URL, Constants.HTTP_IMAGE_TMDB_ORG_T_P_W500 + movieJSonObject.getString(Constants.JSON_POSTER_PATH));
-                    movieValues.put(MovieColumns.SYNOPSIS, movieJSonObject.getString(Constants.JSON_OVERVIEW));
-                    movieValues.put(MovieColumns.VOTE_AVERAGE, movieJSonObject.getDouble(Constants.JSON_VOTE_AVERAGE));
-                    movieValues.put(MovieColumns.POPULARITY, movieJSonObject.getDouble(Constants.JSON_POPULARITY));
-                    movieValues.put(MovieColumns.RELEASE_DATE, movieJSonObject.getString(Constants.JSON_RELEASE_DATE));
-                    movieValues.put(FAVOURITE, 0);
+                    movieValues.put(MovieContract.MovieEntry.COLUMN_ID_FROM_MOVIEDBAPI, movieJSonObject.getString(Constants.JSON_ID));
+                    movieValues.put(MovieContract.MovieEntry.COLUMN_TITLE, movieJSonObject.getString(Constants.JSON_TITLE));
+                    movieValues.put(MovieContract.MovieEntry.COLUMN_ORIGINAL_TITLE, movieJSonObject.getString(Constants.JSON_ORIGINAL_TITLE));
+                    movieValues.put(MovieContract.MovieEntry.COLUMN_IMAGE_URL, Constants.HTTP_IMAGE_TMDB_ORG_T_P_W500 + movieJSonObject.getString(Constants.JSON_POSTER_PATH));
+                    movieValues.put(MovieContract.MovieEntry.COLUMN_SYNOPSIS, movieJSonObject.getString(Constants.JSON_OVERVIEW));
+                    movieValues.put(MovieContract.MovieEntry.COLUMN_VOTE_AVERAGE, movieJSonObject.getDouble(Constants.JSON_VOTE_AVERAGE));
+                    movieValues.put(MovieContract.MovieEntry.COLUMN_POPULARITY, movieJSonObject.getDouble(Constants.JSON_POPULARITY));
+                    movieValues.put(MovieContract.MovieEntry.COLUMN_RELEASE_DATE, movieJSonObject.getString(Constants.JSON_RELEASE_DATE));
+                    movieValues.put(MovieContract.MovieEntry.COLUMN_FAVOURITE, 0);
 
                     cVVector.add(movieValues);
-                    requestReviewFromMovie(movieJSonObject.getString(Constants.JSON_ID));
-                    requestTraillersFromMovie(movieJSonObject.getString(Constants.JSON_ID));
                 }
 
                 existFavouriteItem.close();
+
+                requestTraillersFromMovie(movieJSonObject.getString(Constants.JSON_ID));
+                requestReviewFromMovie(movieJSonObject.getString(Constants.JSON_ID));
             }
 
             // add to database
@@ -179,7 +176,7 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
                 ContentValues[] cvArray = new ContentValues[cVVector.size()];
                 cVVector.toArray(cvArray);
                 //Inserting new movies
-                getContext().getContentResolver().bulkInsert(MovieProvider.Movies.CONTENT_URI, cvArray);
+                getContext().getContentResolver().bulkInsert(MovieContract.MovieEntry.CONTENT_URI, cvArray);
             }
             Log.d("MovieInTheSky", "Sync Complete. " + cVVector.size() + " Inserted");
         } catch (JSONException e) {
@@ -251,28 +248,29 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
                 JSONObject movieJSonObject = videoObjects.getJSONObject(i);
                 ContentValues reviewsValues = new ContentValues();
 
-                reviewsValues.put(ReviewsColumns.MOVIE_ID, movieId);
-                reviewsValues.put(ReviewsColumns.ID_FROM_API, movieJSonObject.getString(Constants.JSON_REVIEW_ID));
-                reviewsValues.put(ReviewsColumns.AUTHOR, movieJSonObject.getString(Constants.JSON_REVIEW_AUTHOR));
-                reviewsValues.put(ReviewsColumns.CONTENT, movieJSonObject.getString(Constants.JSON_REVIEW_CONTENT));
+                reviewsValues.put(MovieContract.ReviewEntry.COLUMN_MOVIE_ID, movieId);
+                reviewsValues.put(MovieContract.ReviewEntry.COLUMN_ID_FROM_MOVIEDBAPI, movieJSonObject.getString(Constants.JSON_REVIEW_ID));
+                reviewsValues.put(MovieContract.ReviewEntry.COLUMN_AUTHOR, movieJSonObject.getString(Constants.JSON_REVIEW_AUTHOR));
+                reviewsValues.put(MovieContract.ReviewEntry.COLUMN_CONTENT, movieJSonObject.getString(Constants.JSON_REVIEW_CONTENT));
 
-                String whereString = ReviewsColumns.ID_FROM_API + " =  ? ";
+                String whereString = MovieContract.ReviewEntry.COLUMN_ID_FROM_MOVIEDBAPI + " =  ? ";
                 String[] values = {movieJSonObject.getString(Constants.JSON_REVIEW_ID)};
 
 
-                Cursor existReviews = getContext().getContentResolver().query(MovieProvider.Reviews.CONTENT_URI, null, whereString, values, null);
+                Cursor existReviews = getContext().getContentResolver().query(MovieContract.ReviewEntry.CONTENT_URI, null, whereString, values, null);
 
                 if (existReviews != null && existReviews.getCount() == 0) {
                     cVVector.add(reviewsValues);
                     existReviews.close();
                 }
-                if (cVVector.size() > 0) {
-                    ContentValues[] cvArray = new ContentValues[cVVector.size()];
-                    cVVector.toArray(cvArray);
-                    //Inserting new Reviews
-                    getContext().getContentResolver().bulkInsert(MovieProvider.Reviews.CONTENT_URI, cvArray);
-                }
             }
+            if (cVVector.size() > 0) {
+                ContentValues[] cvArray = new ContentValues[cVVector.size()];
+                cVVector.toArray(cvArray);
+                //Inserting new Reviews
+                getContext().getContentResolver().bulkInsert(MovieContract.ReviewEntry.CONTENT_URI, cvArray);
+            }
+
         } catch (JSONException e) {
             Log.e("MovieInTheSky", e.getMessage());
         }
@@ -347,32 +345,33 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
                 JSONObject movieJSonObject = videoObjects.getJSONObject(i);
                 ContentValues trailersValues = new ContentValues();
 
-                trailersValues.put(TrailersColumns.MOVIE_ID, movieId);
-                trailersValues.put(TrailersColumns.ID_FROM_API, movieJSonObject.getString(Constants.JSON_TRAILER_ID));
-                trailersValues.put(TrailersColumns.KEY, movieJSonObject.getString(Constants.KEY));
-                trailersValues.put(TrailersColumns.NAME, movieJSonObject.getString(Constants.JSON_TRAILER_NAME));
-                trailersValues.put(TrailersColumns.LANGUAGE, movieJSonObject.getString(Constants.JSON_TRAILER_LANGUAGE));
-                trailersValues.put(TrailersColumns.SITE, movieJSonObject.getString(Constants.JSON_TRAILER_SITE));
-                trailersValues.put(TrailersColumns.SIZE, movieJSonObject.getString(Constants.JSON_TRAILER_SIZE));
-                trailersValues.put(TrailersColumns.TYPE, movieJSonObject.getString(Constants.JSON_TRAILER_TYPE));
+                trailersValues.put(MovieContract.TrailerEntry.COLUMN_MOVIE_ID, movieId);
+                trailersValues.put(MovieContract.TrailerEntry.COLUMN_ID_FROM_MOVIEDBAPI, movieJSonObject.getString(Constants.JSON_TRAILER_ID));
+                trailersValues.put(MovieContract.TrailerEntry.COLUMN_KEY, movieJSonObject.getString(Constants.KEY));
+                trailersValues.put(MovieContract.TrailerEntry.COLUMN_NAME, movieJSonObject.getString(Constants.JSON_TRAILER_NAME));
+                trailersValues.put(MovieContract.TrailerEntry.COLUMN_LANGUAGE, movieJSonObject.getString(Constants.JSON_TRAILER_LANGUAGE));
+                trailersValues.put(MovieContract.TrailerEntry.COLUMN_SITE, movieJSonObject.getString(Constants.JSON_TRAILER_SITE));
+                trailersValues.put(MovieContract.TrailerEntry.COLUMN_SIZE, movieJSonObject.getInt(Constants.JSON_TRAILER_SIZE));
+                trailersValues.put(MovieContract.TrailerEntry.COLUMN_TYPE, movieJSonObject.getString(Constants.JSON_TRAILER_TYPE));
 
 
-                String whereString = TrailersColumns.ID_FROM_API + " =  ? ";
+                String whereString = MovieContract.TrailerEntry.COLUMN_ID_FROM_MOVIEDBAPI + " =  ? ";
                 String[] values = {movieJSonObject.getString(Constants.JSON_TRAILER_ID)};
 
 
-                Cursor existTrailers = getContext().getContentResolver().query(MovieProvider.Trailers.CONTENT_URI, null, whereString, values, null);
+                Cursor existTrailers = getContext().getContentResolver().query(MovieContract.TrailerEntry.CONTENT_URI, null, whereString, values, null);
 
                 if (existTrailers != null && existTrailers.getCount() == 0) {
                     cVVector.add(trailersValues);
                     existTrailers.close();
                 }
-                if (cVVector.size() > 0) {
-                    ContentValues[] cvArray = new ContentValues[cVVector.size()];
-                    cVVector.toArray(cvArray);
-                    //Inserting new trailers
-                    getContext().getContentResolver().bulkInsert(MovieProvider.Trailers.CONTENT_URI, cvArray);
-                }
+            }
+
+            if (cVVector.size() > 0) {
+                ContentValues[] cvArray = new ContentValues[cVVector.size()];
+                cVVector.toArray(cvArray);
+                //Inserting new trailers
+                getContext().getContentResolver().bulkInsert(MovieContract.TrailerEntry.CONTENT_URI, cvArray);
             }
 
 

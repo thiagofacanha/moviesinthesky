@@ -31,8 +31,8 @@
                 android:contentDescription="@string/movie_poster" />
             <ImageView
                 android:id="@+id/imageview_favourite"
-                android:layout_width="64dp"
-                android:layout_height="64dp"
+                android:layout_width="@dimen/favourite_icon_width"
+                android:layout_height="@dimen/favourite_icon_height"
                 android:src="@drawable/normal"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"

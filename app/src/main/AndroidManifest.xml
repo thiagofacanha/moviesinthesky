@@ -61,8 +61,8 @@
         </service>
 
         <provider
-            android:name="br.com.sandclan.moviesinthesky.data.generated.MovieProvider"
-            android:authorities="br.com.sandclan.moviesinthesky.data.MovieProvider"
+            android:name="br.com.sandclan.moviesinthesky.data.MovieProvider"
+            android:authorities="br.com.sandclan.moviesinthesky.data"
             android:exported="false"
             android:syncable="true" />
 
