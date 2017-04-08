@@ -18,4 +18,6 @@
     <dimen name="grid_horizontal_spacing">5dp</dimen>
     <dimen name="trailer_icon_width">240dp</dimen>
     <dimen name="trailer_icon_height">160dp</dimen>
+    <dimen name="favourite_icon_width">64dp</dimen>
+    <dimen name="favourite_icon_height">64dp</dimen>
 </resources>

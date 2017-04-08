@@ -64,7 +64,7 @@ public class MovieSyncAdapter extends AbstractThreadedSyncAdapter {
             String sortOrder = sharedPrefs.getString(getContext().getString(R.string.pref_order_by_key),
                     getContext().getString(R.string.popularity_value));
             if (sortOrder.equals(getContext().getString(R.string.favourite_value))) {
-                sortOrder = getContext().getString(R.string.popularity_value);
+               return;
             }
 
             final String MOVIE_BASE_URL =

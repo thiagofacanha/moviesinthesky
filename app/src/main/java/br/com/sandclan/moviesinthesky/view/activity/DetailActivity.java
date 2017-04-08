@@ -104,7 +104,10 @@ public class DetailActivity extends AppCompatActivity {
 
 
     public void callYoutube(View view) {
-        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.BASIC_YOUTUBE_URL + mTrailerUrl)));
+        Intent trailerIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.BASIC_YOUTUBE_URL + mTrailerUrl));
+        if (trailerIntent.resolveActivity(getPackageManager()) != null) {
+            startActivity(trailerIntent);
+        }
     }
 
     public void favourite(View view) {
